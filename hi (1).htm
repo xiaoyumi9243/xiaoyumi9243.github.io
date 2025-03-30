@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xiaoyumi官方网站</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" alt="Logo">
+                <span>xiaoyumi</span>
+            </div>
+            <ul class="nav-links">
+               <li><a href="https://xiaoyumi.com/buy">购买</a></li>
+                <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
+               <a href="https://4399.com">
+  <img src="https://img1.baidu.com/it/u=3287677374,718479402&fm=253&fmt=auto&app=138&f=JPEG?w=400&h=400" alt="示例图片" width="50" height="50">
+</a>
+            </ul>
+            <div class="nav-right">
+<a href="https://login.live.com">
+ <img src="https://img0.baidu.com/it/u=2877351268,3101359067&fm=253&fmt=auto&app=138&f=JPEG?w=292&h=300" alt="登录" width="50" height="50">
+</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+           <h1>等待收购的人群</h1>
+            <p>肖雨彤</p>
+           <!-- 打开弹窗的按钮 -->
+    <button class="open-modal-btn">立即收购</button>
+    <!-- 弹窗结构 -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            
+          <p>收购界面</p>
+         <form action="/submit-form" method="post">
+    <label for="username">姓名:</label>
+    <input type="text" id="username" name="username" placeholder="请输入姓名"><br><br>
+
+    <label for="password">密码:</label>
+    <input type="password" id="password" name="password" placeholder="请输入密码"><br><br>
+
+    <label for="email">电子邮件:</label>
+    <input type="email" id="email" name="email" placeholder="请输入电子邮件"><br><br>
+
+    <label for="age">手机号:</label>
+    <input type="number" id="age" name="age" placeholder="请输入手机号" min="0" max="99999999999"><br><br>
+
+    <label for="birthdate">出生日期:</label>
+    <input type="date" id="birthdate" name="birthdate"><br><br>
+
+    <label for="subscribe">向你发送这个人的踪迹:</label>
+    <input type="checkbox" id="subscribe" name="subscribe" value="yes"><br><br>
+
+    <label for="male">男</label>
+    <input type="radio" id="male" name="gender" value="male">
+    <label for="female">女</label>
+    <input type="radio" id="female" name="gender" value="female"><br><br>
+    
+    <label for="file">上传证件照:</label>
+<input type="file" id="file" name="file">
+
+    <label for="message">用途:</label><br>
+    <textarea id="message" name="message" rows="4" cols="50" placeholder="请输入你收购这个人的用途"></textarea><br><br>
+
+    <input type="submit" value="提交">
+    <input type="reset" value="重置">
+</form>
+        </div>
+    </div>
+    <style>
+        /* 弹窗背景 */
+        .modal {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 弹窗内容 */
+        .modal-content {
+            background-color: #598;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* 关闭按钮 */
+        .close {
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        /* 打开弹窗的按钮 */
+        .open-modal-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px;
+        }
+    </style>
+    <script>
+        // 获取弹窗和按钮元素
+        const modal = document.getElementById("myModal");
+        const openBtn = document.querySelector(".open-modal-btn");
+        const closeBtn = document.querySelector(".close");
+
+        // 打开弹窗
+        openBtn.onclick = function() {
+            modal.style.display = "flex";
+        }
+
+        // 关闭弹窗
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // 点击弹窗外部关闭弹窗
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+    </section>
+
+    <section class="products">
+        <div class="product-card">
+            <img src="https://qingyun.huawei.com/content/dam/huawei-cbg-site/qingyun/mkt/pdp/tablets/qingyun-c7-2nd/images/kv/huawei-qingyun-c7-2nd-kv-xs.webp" alt="产品1">
+            <a>比虫子还要智障的电脑</a>
+            <p>轻薄设计，弱化性能</p>
+            <a href="https://qingyun.huawei.com/tablets/qingyun-c7-2nd/?utm_medium=cpc&utm_source=zdkeyword&utm_campaign=c7_launch&utm_term=mob_tobpb_tongyongci_bangong" class="btn">购买</a>
+            <div class="product-card">
+            <img src="https://img2.baidu.com/it/u=303560653,3109790051&fm=253&fmt=auto&app=138&f=JPEG?w=778&h=500" alt="产品2">
+            <a>智障才会用的游戏机</a>
+            <p>不仅不好用而且还超级发烫</p>
+            <a href="https://mitem.jd.hk/product/25175059796.html?ad_od=3" class="btn">购买</a>
+            
+        </div>
+        </div>
+
+    </section>
+    <section class="products">
+        <div class="product-card">
+        <img src="https://gips2.baidu.com/it/u=2004655209,2582282130&fm=3037&app=3037&size=w354&q=75&n=0&f=JPEG&fmt=auto&maxorilen2heic=2000000" alt="产品1">
+        <a>智障才会用的游戏手柄</a>
+        <a href="https://www.microsoftstore.com.cn/hardware/accessories/xbox-accessories?icid=mscom_marcom_CPH4a_XboxControllers" class="btn">购买</a>
+        <img src="https://img0.baidu.com/it/u=1076133456,3606808142&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=800" alt="产品1">
+            <a>破烂电脑只需1万元即可拿到</a>
+            <a href="https://lp.pinduoduo.com/poros/h5?ads_channel=baidu_sem&ads_account=41594336&ads_set=302129887&ads_id=8266479587&keywordid=597327824503&exp_id=41&keyword=&outer_id=04-Hwx27yWlsAz6Jx9XoIB5Eg&_p_sem_ver=20250219&segmentid=null&creative_id=74200578230&match_type=1&trig_flag=nm&content_id={content_id}&page_uid=f1374bd20cf447d6be4a6e2817465c6a&bd_vid=nH0kP10sPWD1PWT4PHmLnWmYnWuxnWc1g17xnH0sg1wxP1fznj0dP16zn10#back" class="btn">购买</a>
+  <h5>今日推荐视频</h5>
+  <video width="350" height="200" controls>
+  <source src="https://vd3.bdstatic.com/mda-pg649bc6re31ufjc/sc/cae_h264/1688780200052278292/mda-pg649bc6re31ufjc.mp4?pd=19&vt=1" type="video/mp4">
+  您的浏览器不支持视频标签。
+</video>
+</div>
+</section>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Microsoft. 保留所有权利。</p>
+            <ul class="footer-links">
+                <li><a href="https://www.microsoft.com/zh-cn/privacy">隐私声明</a></li>
+                <li><a href="https://www.microsoft.com/zh-cn/legal/terms-of-use">使用条款</a></li>
+                <li><a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks">商标</a></li>
+                <li><a href="https://account.microsoft.com/privacy/ad-settings?refd=www.microsoft.com">关于我们的广告</a></li>
+            </ul>
+        </div>
+    </footer>
+    <style>
+   /* styles.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+header {
+    background-color: #0078d4;
+    color: white;
+    padding: 10px 20px;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 30px;
+    margin-right: 10px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.hero {
+    background-image: url('https://via.placeholder.com/1200x400');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero-content h1 {
+    font-size: 3em;
+    margin: 0;
+}
+
+.hero-content p {
+    font-size: 1.5em;
+    margin: 10px 0 20px;
+}
+
+.btn {
+    background-color: #0078d4;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.products {
+    display: flex;
+    justify-content: space-around;
+    padding: 50px 20px;
+    background-color: #f4f4f4;
+}
+
+.product-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+.product-card h3 {
+    margin: 15px 0 10px;
+}
+
+.product-card p {
+    margin: 0 0 20px;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 0;
+}
+
+.footer-links li {
+    margin: 0 15px;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+}
+</style>
+</body>
+</html>
