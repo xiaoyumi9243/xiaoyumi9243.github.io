@@ -1,0 +1,27 @@
+<div class="wechat-add">
+  <button onclick="tryWechatJump()">一键添加微信</button>
+  <div class="fallback" style="display:none">
+    <p>请手动操作：</p>
+    <p>1. 打开微信 → 右上角+号 → 添加朋友</p>
+    <p>2. 输入ID: <strong>SERVICE123</strong></p>
+    <p>3. 或扫描下方二维码</p>
+    <img src="qrcode.jpg" width="150">
+  </div>
+</div>
+
+<script>
+function tryWechatJump() {
+  // 记录跳转时间
+  const start = Date.now();
+  
+  // 尝试跳转
+  window.location.href = 'weixin://dl/add?username=SERVICE123';
+  
+  // 500ms后检测是否跳转成功
+  setTimeout(() => {
+    if (Date.now() - start < 600) {
+      document.querySelector('.fallback').style.display = 'block';
+    }
+  }, 500);
+}
+</script>
