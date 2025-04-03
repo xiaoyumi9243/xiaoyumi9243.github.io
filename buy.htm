@@ -1,27 +1,417 @@
-<div class="wechat-add">
-  <button onclick="tryWechatJump()">一键添加微信</button>
-  <div class="fallback" style="display:none">
-    <p>请手动操作：</p>
-    <p>1. 打开微信 → 右上角+号 → 添加朋友</p>
-    <p>2. 输入ID: <strong>SERVICE123</strong></p>
-    <p>3. 或扫描下方二维码</p>
-    <img src="qrcode.jpg" width="150">
-  </div>
-</div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xiaoyumi购买</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        .carousel-container {
+            max-width: 800px;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .carousel-slides {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .carousel-slide {
+            min-width: 100%;
+        }
+        
+        .carousel-slide img {
+            width: 100%;
+            display: block;
+        }
+        
+        .carousel-caption {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .carousel-text {
+            flex-grow: 1;
+        }
+        
+        .carousel-btn {
+            padding: 8px 15px;
+            background: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .carousel-btn:hover {
+            background: #e64a19;
+        }
+        
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        
+        .carousel-dot.active {
+            background: #333;
+        }
+        
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .carousel-arrow.prev {
+            left: 10px;
+        }
+        
+        .carousel-arrow.next {
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="carousel-container">
+        <!-- 图片轮播部分 -->
+        <div class="carousel-slides">
+            <div class="carousel-slide">
+                <img src="https://via.placeholder.com/800x400/ff9999/000000?text=Slide+1" alt="Slide 1">
+            </div>
+            <div class="carousel-slide">
+                <img src="https://via.placeholder.com/800x400/99ff99/000000?text=Slide+2" alt="Slide 2">
+            </div>
+            <div class="carousel-slide">
+                <img src="https://via.placeholder.com/800x400/9999ff/000000?text=Slide+3" alt="Slide 3">
+            </div>
+        </div>
+        
+        <!-- 文字和按钮部分 -->
+        <div class="carousel-caption">
+            <div class="carousel-text">这是第一张幻灯片的描述文字</div>
+            <a href="https://example.com/page1" class="carousel-btn">了解更多</a>
+        </div>
+        
+        <!-- 导航箭头 -->
+        <button class="carousel-arrow prev">&#10094;</button>
+        <button class="carousel-arrow next">&#10095;</button>
+        
+        <!-- 导航点 -->
+        <div class="carousel-nav">
+            <div class="carousel-dot active" data-index="0"></div>
+            <div class="carousel-dot" data-index="1"></div>
+            <div class="carousel-dot" data-index="2"></div>
+        </div>
+    </div>
 
-<script>
-function tryWechatJump() {
-  // 记录跳转时间
-  const start = Date.now();
-  
-  // 尝试跳转
-  window.location.href = 'weixin://dl/add?username=SERVICE123';
-  
-  // 500ms后检测是否跳转成功
-  setTimeout(() => {
-    if (Date.now() - start < 600) {
-      document.querySelector('.fallback').style.display = 'block';
-    }
-  }, 500);
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelector('.carousel-slides');
+            const slideItems = document.querySelectorAll('.carousel-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+            const prevBtn = document.querySelector('.carousel-arrow.prev');
+            const nextBtn = document.querySelector('.carousel-arrow.next');
+            const captionText = document.querySelector('.carousel-text');
+            const actionBtn = document.querySelector('.carousel-btn');
+            
+            // 幻灯片数据和配置
+            const slideData = [
+                {
+                    text: "这是第一张幻灯片的描述文字",
+                    btnLink: "https://example.com/page1",
+                    btnText: "了解更多"
+                },
+                {
+                    text: "这是第二张幻灯片的详细说明内容",
+                    btnLink: "https://example.com/page2",
+                    btnText: "立即购买"
+                },
+                {
+                    text: "第三张幻灯片提供了更多产品信息",
+                    btnLink: "https://example.com/page3",
+                    btnText: "免费试用"
+                }
+            ];
+            
+            let currentIndex = 0;
+            const totalSlides = slideItems.length;
+            
+            // 更新幻灯片位置
+            function updateSlidePosition() {
+                slides.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                // 更新导航点状态
+                dots.forEach(dot => dot.classList.remove('active'));
+                dots[currentIndex].classList.add('active');
+                
+                // 更新文字和按钮
+                captionText.textContent = slideData[currentIndex].text;
+                actionBtn.href = slideData[currentIndex].btnLink;
+                actionBtn.textContent = slideData[currentIndex].btnText;
+            }
+            // 下一张幻灯片
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % totalSlides;
+                updateSlidePosition();
+            }
+            
+            // 上一张幻灯片
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                updateSlidePosition();
+            }
+            
+            // 自动轮播
+            let slideInterval = setInterval(nextSlide, 3000);
+            
+            // 鼠标悬停时暂停自动轮播
+            document.querySelector('.carousel-container').addEventListener('mouseenter', () => {
+                clearInterval(slideInterval);
+            });
+            
+            // 鼠标离开时恢复自动轮播
+            document.querySelector('.carousel-container').addEventListener('mouseleave', () => {
+                slideInterval = setInterval(nextSlide, 3000);
+            });
+            
+            // 点击导航点跳转到对应幻灯片
+            dots.forEach(dot => {
+                dot.addEventListener('click', function() {
+                    currentIndex = parseInt(this.getAttribute('data-index'));
+                    updateSlidePosition();
+                });
+            });
+            
+            // 点击箭头按钮
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+            
+            // 键盘导航
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowRight') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+        });
+    </script>
+    <section class="products">
+        <div class="product-card">
+            <img src="https://qingyun.huawei.com/content/dam/huawei-cbg-site/qingyun/mkt/pdp/tablets/qingyun-c7-2nd/images/kv/huawei-qingyun-c7-2nd-kv-xs.webp" alt="产品1">
+            <a>比虫子还要智障的电脑</a>
+            <p>轻薄设计，弱化性能</p>
+            <a href="https://qingyun.huawei.com/tablets/qingyun-c7-2nd/?utm_medium=cpc&utm_source=zdkeyword&utm_campaign=c7_launch&utm_term=mob_tobpb_tongyongci_bangong" class="btn">购买</a>
+            <div class="product-card">
+            <img src="https://img2.baidu.com/it/u=303560653,3109790051&fm=253&fmt=auto&app=138&f=JPEG?w=778&h=500" alt="产品2">
+            <a>智障才会用的游戏机</a>
+            <p>不仅不好用而且还超级发烫</p>
+            <a href="https://mitem.jd.hk/product/25175059796.html?ad_od=3" class="btn">购买</a>
+            
+        </div>
+        </div>
+
+    </section>
+    <section class="products">
+        <div class="product-card">
+        <img src="https://gips2.baidu.com/it/u=2004655209,2582282130&fm=3037&app=3037&size=w354&q=75&n=0&f=JPEG&fmt=auto&maxorilen2heic=2000000" alt="产品1">
+        <a>智障才会用的游戏手柄</a>
+        <a href="https://www.microsoftstore.com.cn/hardware/accessories/xbox-accessories?icid=mscom_marcom_CPH4a_XboxControllers" class="btn">购买</a>
+        <img src="https://img0.baidu.com/it/u=1076133456,3606808142&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=800" alt="产品1">
+            <a>破烂电脑只需1万元即可拿到</a>
+            <a href="https://lp.pinduoduo.com/poros/h5?ads_channel=baidu_sem&ads_account=41594336&ads_set=302129887&ads_id=8266479587&keywordid=597327824503&exp_id=41&keyword=&outer_id=04-Hwx27yWlsAz6Jx9XoIB5Eg&_p_sem_ver=20250219&segmentid=null&creative_id=74200578230&match_type=1&trig_flag=nm&content_id={content_id}&page_uid=f1374bd20cf447d6be4a6e2817465c6a&bd_vid=nH0kP10sPWD1PWT4PHmLnWmYnWuxnWc1g17xnH0sg1wxP1fznj0dP16zn10#back" class="btn">购买</a>
+ <a>由xiaoyumi打造的游戏</a>
+<img src="https://nb-data.klpbbs.com/forum/202503/30/133818a6rq64qbgps42eng.jpg" alt="产品1">
+<a>超级恐怖画风，吓死你</a>
+<a href="https://klpbbs.com/thread-159796-1-1.html" class="btn">查看详情</a>
+ <a href="https://klpbbs.com/home.php?mod=space&uid=1913122&do=thread&view=me&from=space&mobile=2" class="btn">更多</a>
+ <img src="https://cyxw.cn/Template/ChongYang/Img/loaddata.gif" alt="产品1">
+ <p>正在全力加载更多商品</p>
+</div>
+</section>
+<footer>
+            <ul class="footer-links">
+            <li><a href="https://xiaoyumi9243.github.io/">首页</a></li>
+                <li><a href="https://www.microsoft.com/zh-cn/privacy">隐私声明</a></li>
+                <li><a href="https://www.microsoft.com/zh-cn/legal/terms-of-use">使用条款</a></li>
+                <li><a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks">商标</a></li>
+                <li><a href="https://account.microsoft.com/privacy/ad-settings?refd=www.microsoft.com">关于我们的广告</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+<style>
+   /* styles.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
 }
-</script>
+
+header {
+    background-color: #0078d4;
+    color: white;
+    padding: 10px 20px;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 30px;
+    margin-right: 10px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.hero {
+    background-image: url('https://via.placeholder.com/1200x400');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero-content h1 {
+    font-size: 3em;
+    margin: 0;
+}
+
+.hero-content p {
+    font-size: 1.5em;
+    margin: 10px 0 20px;
+}
+
+.btn {
+    background-color: #0078d4;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.products {
+    display: flex;
+    justify-content: space-around;
+    padding: 50px 20px;
+    background-color: #f4f4f4;
+}
+
+.product-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+.product-card h3 {
+    margin: 15px 0 10px;
+}
+
+.product-card p {
+    margin: 0 0 20px;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 0;
+}
+
+.footer-links li {
+    margin: 0 15px;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+}
+</style>
+</html>

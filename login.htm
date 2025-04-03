@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xiaoyumi登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .login-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .register-link a {
+            color: #4CAF50;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        /* 注册弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 350px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+        
+        .close-btn:hover {
+            color: #333;
+        }
+        
+        .error-message {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .success-message {
+            color: #4CAF50;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录表单 -->
+    <div class="login-container">
+        <h1>登录</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div id="loginError" class="error-message">用户名或密码错误</div>
+            <button type="submit" class="login-btn">登录</button>
+        </form>
+        <div class="register-link">
+            <a id="registerLink">没有账号？立即注册</a>
+        </div>
+    </div>
+    
+    <!-- 注册弹窗 -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h1>注册</h1>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regUsername">用户名</label>
+                    <input type="text" id="regUsername" name="regUsername" required>
+                    <div id="usernameError" class="error-message">用户名已存在</div>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">密码</label>
+                    <input type="password" id="regPassword" name="regPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <div id="passwordError" class="error-message">两次密码不一致</div>
+                </div>
+                <div id="registerSuccess" class="success-message">注册成功！</div>
+                <button type="submit" class="login-btn">注册</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const loginForm = document.getElementById('loginForm');
+            const registerLink = document.getElementById('registerLink');
+            const registerModal = document.getElementById('registerModal');
+            const closeBtn = document.querySelector('.close-btn');
+            const registerForm = document.getElementById('registerForm');
+            const loginError = document.getElementById('loginError');
+            const usernameError = document.getElementById('usernameError');
+            const passwordError = document.getElementById('passwordError');
+            const registerSuccess = document.getElementById('registerSuccess');
+            
+            // 初始用户数据 (可以存储在localStorage中)
+            let users = JSON.parse(localStorage.getItem('users')) || [
+                { username: 'admin', password: 'admin123' },
+                { username: 'user1', password: '123456' }
+            ];
+            
+            // 打开注册弹窗
+            registerLink.addEventListener('click', function() {
+                registerModal.style.display = 'block';
+            });
+            // 关闭注册弹窗
+            closeBtn.addEventListener('click', function() {
+                registerModal.style.display = 'none';
+                clearRegisterForm();
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target === registerModal) {
+                    registerModal.style.display = 'none';
+                    clearRegisterForm();
+                }
+            });
+            
+            // 登录表单提交
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // 验证用户
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    // 登录成功
+                    loginError.style.display = 'none';
+                    
+                    // 保存登录状态到sessionStorage
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('currentUser', username);
+                    
+                    // 跳转到指定页面
+                    window.location.href = 'https://xiaoyumi9243.github.io/'; // 修改为你想要跳转的页面
+                } else {
+                    // 登录失败
+                    loginError.style.display = 'block';
+                }
+            });
+            
+            // 注册表单提交
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('regUsername').value;
+                const password = document.getElementById('regPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                // 重置错误消息
+                usernameError.style.display = 'none';
+                passwordError.style.display = 'none';
+                registerSuccess.style.display = 'none';
+                
+                // 验证用户名是否已存在
+                const userExists = users.some(u => u.username === username);
+                if (userExists) {
+                    usernameError.style.display = 'block';
+                    return;
+                }
+                
+                // 验证密码是否一致
+                if (password !== confirmPassword) {
+                    passwordError.style.display = 'block';
+                    return;
+                }
+                
+                // 添加新用户
+                users.push({ username, password });
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // 显示成功消息
+                registerSuccess.style.display = 'block';
+                
+                // 2秒后关闭弹窗
+                setTimeout(function() {
+                    registerModal.style.display = 'none';
+                    clearRegisterForm();
+                }, 2000);
+            });
+            
+            // 清空注册表单
+            function clearRegisterForm() {
+                registerForm.reset();
+                usernameError.style.display = 'none';
+                passwordError.style.display = 'none';
+                registerSuccess.style.display = 'none';
+            }
+            
+            // 检查是否已登录
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                // 如果已登录，直接跳转到指定页面
+                window.location.href = 'https://xiaoyumi9243.github.io/'; // 修改为你想要跳转的页面
+            }
+        });
+    </script>
+</body>
+</html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xiaoyumi官方网站</title>
-    <link rel="stylesheet" href="styles.css">
+   <link rel="icon" href="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" type="image/x-icon">
 </head>
 <body>
     <header>
@@ -14,16 +14,39 @@
                 <span>xiaoyumi</span>
             </div>
             <ul class="nav-links">
-               <li><a href="https://xiaoyumi.com/buy">购买</a></li>
+               <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
                 <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
                <a href="https://4399.com">
   <img src="https://img1.baidu.com/it/u=3287677374,718479402&fm=253&fmt=auto&app=138&f=JPEG?w=400&h=400" alt="示例图片" width="50" height="50">
 </a>
             </ul>
             <div class="nav-right">
-<a href="https://login.live.com">
+<header>
+    <!-- 其他内容 -->
+    <div id="auth-section">
+        <a href="https://xiaoyumi9243.github.io/login.htm" id="login-button">登录
  <img src="https://img0.baidu.com/it/u=2877351268,3101359067&fm=253&fmt=auto&app=138&f=JPEG?w=292&h=300" alt="登录" width="50" height="50">
 </a>
+    </div>
+</header>
+
+<script>
+    // 检查登录状态
+    document.addEventListener('DOMContentLoaded', function() {
+        const authSection = document.getElementById('auth-section');
+        
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            // 隐藏登录按钮
+            document.getElementById('login-button').style.display = 'none';
+            
+            // 显示用户信息和登出按钮
+            authSection.innerHTML = `
+                <span>欢迎, ${localStorage.getItem('currentUser')}</span>
+                <a href="logout.html">退出</a>
+            `;
+        }
+    });
+</script>
             </div>
         </nav>
     </header>
@@ -174,11 +197,37 @@
   <source src="https://vd3.bdstatic.com/mda-pg649bc6re31ufjc/sc/cae_h264/1688780200052278292/mda-pg649bc6re31ufjc.mp4?pd=19&vt=1" type="video/mp4">
   您的浏览器不支持视频标签。
 </video>
+<a>由xiaoyumi打造的游戏</a>
+<img src="https://nb-data.klpbbs.com/forum/202503/30/133818a6rq64qbgps42eng.jpg" alt="产品1">
+<a>超级恐怖画风，吓死你</a>
+<a href="https://klpbbs.com/thread-159796-1-1.html" class="btn">查看详情</a>
+ <a href="https://klpbbs.com/home.php?mod=space&uid=1913122&do=thread&view=me&from=space&mobile=2" class="btn">更多</a>
 </div>
 </section>
+<a class="btn" href="tel:13387739883">电话</a>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <style>
+        body { transition: all 0.3s; }
+        body.light { background: white; color: black; }
+        body.dark { background: #333; color: white; }
+    </style>
+</head>
+<body class="light">
+    <button id="theme-btn">切换主题</button>
+    <script>
+        // 主题切换
+        document.getElementById('theme-btn').addEventListener('click', function() {
+            const newTheme = document.body.className === 'light' ? 'dark' : 'light';
+            document.body.className = newTheme;
+            Cookies.set('theme', newTheme, { expires: 7 });
+        });
+        
+        // 初始化主题
+        if(Cookies.get('theme')) {
+            document.body.className = Cookies.get('theme');
+        }
+    </script>
     <footer>
-        <div class="footer-content">
-            <p>&copy; 2025 xiaoyumi. 保留所有权利。</p>
             <ul class="footer-links">
                 <li><a href="https://www.microsoft.com/zh-cn/privacy">隐私声明</a></li>
                 <li><a href="https://www.microsoft.com/zh-cn/legal/terms-of-use">使用条款</a></li>
@@ -326,5 +375,29 @@ footer {
     text-decoration: none;
 }
 </style>
-</body>
-</html>
+<header>
+    <!-- 其他内容 -->
+    <div id="auth-section">
+        <a href="login.html" id="login-button">登录</a>
+    </div>
+</header>
+
+<script>
+    // 检查登录状态
+    document.addEventListener('DOMContentLoaded', function() {
+        const authSection = document.getElementById('auth-section');
+        
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            // 隐藏登录按钮
+            document.getElementById('login-button').style.display = 'none';
+            
+            // 显示用户信息和登出按钮
+            authSection.innerHTML = `
+                <span>欢迎, ${localStorage.getItem('currentUser')}</span>
+                <a href="logout.html">退出</a>
+            `;
+        }
+    });
+</script>
+        </body>
+        </html>
