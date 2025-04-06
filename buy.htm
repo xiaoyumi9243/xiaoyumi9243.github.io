@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xiaoyumi购买</title>
+    <link rel="icon" href="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -107,24 +108,69 @@
     </style>
 </head>
 <body>
+<header>
+        <nav>
+            <div class="logo">
+                <img src="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" alt="Logo">
+                <span>xiaoyumi</span>
+            </div>
+            <ul class="nav-links">
+               <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
+                <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
+               <a href="https://4399.com">
+  <img src="https://img1.baidu.com/it/u=3287677374,718479402&fm=253&fmt=auto&app=138&f=JPEG?w=400&h=400" alt="示例图片" width="50" height="50">
+</a>
+            </ul>
+            <div class="nav-right">
+<header>
+    <!-- 其他内容 -->
+    <div id="auth-section">
+        <a href="https://xiaoyumi9243.github.io/login.htm" id="login-button"> 
+ <img src="https://img0.baidu.com/it/u=2877351268,3101359067&fm=253&fmt=auto&app=138&f=JPEG?w=292&h=300" alt="登录" width="50" height="50">
+</a>
+    </div>
+</header>
+
+<script>
+    // 检查登录状态
+    document.addEventListener('DOMContentLoaded', function() {
+        const authSection = document.getElementById('auth-section');
+        
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            // 隐藏登录按钮
+            document.getElementById('login-button').style.display = 'none';
+            
+            // 显示用户信息和登出按钮
+            authSection.innerHTML = `
+                <span>欢迎, ${localStorage.getItem('currentUser')}</span>
+                <a href="logout.html">退出</a>
+            `;
+        }
+    });
+</script>
+            </div>
+        </nav>
+    </header>
 <div class="carousel-container">
         <!-- 图片轮播部分 -->
         <div class="carousel-slides">
             <div class="carousel-slide">
-                <img src="https://via.placeholder.com/800x400/ff9999/000000?text=Slide+1" alt="Slide 1">
+                <img src="https://xiaoyumi9243.github.io/buyadpng.png" alt="Slide 1">
             </div>
             <div class="carousel-slide">
-                <img src="https://via.placeholder.com/800x400/99ff99/000000?text=Slide+2" alt="Slide 2">
+                <img src="https://xiaoyumi9243.github.io/buyad1png.png" alt="Slide 2">
             </div>
             <div class="carousel-slide">
-                <img src="https://via.placeholder.com/800x400/9999ff/000000?text=Slide+3" alt="Slide 3">
+                <div class="carousel-slide">
+    <img src="https://nb-data.klpbbs.com/forum/202503/30/133818a6rq64qbgps42eng.jpg" alt="Slide 3" class="small-slide">
+</div>
             </div>
         </div>
         
         <!-- 文字和按钮部分 -->
         <div class="carousel-caption">
-            <div class="carousel-text">这是第一张幻灯片的描述文字</div>
-            <a href="https://example.com/page1" class="carousel-btn">了解更多</a>
+            <div class="carousel-text">领取一张优惠券</div>
+            <a href="https://example.com/page1" class="carousel-btn">领取</a>
         </div>
         
         <!-- 导航箭头 -->
@@ -152,19 +198,19 @@
             // 幻灯片数据和配置
             const slideData = [
                 {
-                    text: "这是第一张幻灯片的描述文字",
+                    text: "领取一张优惠券",
                     btnLink: "https://example.com/page1",
-                    btnText: "了解更多"
+                    btnText: "领取"
                 },
                 {
-                    text: "这是第二张幻灯片的详细说明内容",
+                    text: "俢改mc获得收益",
                     btnLink: "https://example.com/page2",
-                    btnText: "立即购买"
+                    btnText: "参与"
                 },
                 {
-                    text: "第三张幻灯片提供了更多产品信息",
+                    text: "游玩一个游戏",
                     btnLink: "https://example.com/page3",
-                    btnText: "免费试用"
+                    btnText: "立即式玩"
                 }
             ];
             
@@ -260,14 +306,28 @@
 <a>超级恐怖画风，吓死你</a>
 <a href="https://klpbbs.com/thread-159796-1-1.html" class="btn">查看详情</a>
  <a href="https://klpbbs.com/home.php?mod=space&uid=1913122&do=thread&view=me&from=space&mobile=2" class="btn">更多</a>
- <img src="https://cyxw.cn/Template/ChongYang/Img/loaddata.gif" alt="产品1">
- <p>正在全力加载更多商品</p>
 </div>
 </section>
+<div style="display: flex; align-items: center; gap: 10px;">
+ <style>
+    .centered-loading {
+        width: 50px;
+        height: 50px;
+        display: block;
+        margin: 0 auto 10px;
+    }
+</style>
+
+<img src="https://xiaoyumi9243.github.io/load.gif" 
+     alt="加载动画" 
+     class="centered-loading">
+</div><div style="text-align: center;">
+  正在全力加载更多商品
+</div>
 <footer>
             <ul class="footer-links">
             <li><a href="https://xiaoyumi9243.github.io/">首页</a></li>
-                <li><a href="https://www.microsoft.com/zh-cn/privacy">隐私声明</a></li>
+                <li><a href="https://xiaoyumi9243.github.io/bug.htm">Bug反馈</a></li>
                 <li><a href="https://www.microsoft.com/zh-cn/legal/terms-of-use">使用条款</a></li>
                 <li><a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks">商标</a></li>
                 <li><a href="https://account.microsoft.com/privacy/ad-settings?refd=www.microsoft.com">关于我们的广告</a></li>
@@ -412,6 +472,12 @@ footer {
 .footer-links a {
     color: white;
     text-decoration: none;
+}
+</style>
+<style>
+.small-slide {
+    height: 240px;
+    object-fit: cover;
 }
 </style>
 </html>

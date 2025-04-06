@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xiaoyumi官方网站</title>
+   <link rel="icon" href="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" alt="Logo">
+                <span>xiaoyumi</span>
+            </div>
+            <ul class="nav-links">
+               <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
+                <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
+               <a href="https://4399.com">
+  <img src="https://img1.baidu.com/it/u=3287677374,718479402&fm=253&fmt=auto&app=138&f=JPEG?w=400&h=400" alt="示例图片" width="50" height="50">
+</a>
+            </ul>
+            <div class="nav-right">
+<header>
+    <!-- 其他内容 -->
+    <div id="auth-section">
+        <a href="https://xiaoyumi9243.github.io/login.htm" id="login-button"> 
+ <img src="https://img0.baidu.com/it/u=2877351268,3101359067&fm=253&fmt=auto&app=138&f=JPEG?w=292&h=300" alt="登录" width="50" height="50">
+</a>
+    </div>
+</header>
+
+<script>
+    // 检查登录状态
+    document.addEventListener('DOMContentLoaded', function() {
+        const authSection = document.getElementById('auth-section');
+        
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            // 隐藏登录按钮
+            document.getElementById('login-button').style.display = 'none';
+            
+            // 显示用户信息和登出按钮
+            authSection.innerHTML = `
+                <span>欢迎, ${localStorage.getItem('currentUser')}</span>
+                <a href="logout.html">退出</a>
+            `;
+        }
+    });
+</script>
+            </div>
+        </nav>
+    </header>
+    <section class="products">
+        <div class="product-card">
+        <h1>内部游戏</h1>
+       <style>
+    .centered-loading {
+        width: 100px;
+        height: 100px;
+        display: block;
+        margin: 0 auto 10px;
+    }
+</style>
+
+<img src="https://img1.baidu.com/it/u=1143739182,3378608913&fm=253&fmt=auto&app=138&f=JPEG?w=243&h=243" 
+     alt="加载动画" 
+     class="centered-loading">
+        <a>我的世界网页版</a>
+        <div style="text-align: center;">
+  <a href="https://xiaoyumi9243.github.io/Minecraft.htm"class="btn">免费游玩</a>
+</div>
+        </div>
+        </div>
+    </section>
+    <a>内部游戏太少了？查看外部游戏</a>
+        <a href="https://4399.com"class="btn">立即进入</a>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <style>
+        body { transition: all 0.3s; }
+        body.light { background: white; color: black; }
+        body.dark { background: #333; color: white; }
+    </style>
+</head>
+<body class="light">
+    <button id="theme-btn">切换主题</button>
+    <script>
+        // 主题切换
+        document.getElementById('theme-btn').addEventListener('click', function() {
+            const newTheme = document.body.className === 'light' ? 'dark' : 'light';
+            document.body.className = newTheme;
+            Cookies.set('theme', newTheme, { expires: 7 });
+        });
+        
+        // 初始化主题
+        if(Cookies.get('theme')) {
+            document.body.className = Cookies.get('theme');
+        }
+    </script>
+    <footer>
+            <ul class="footer-links">
+                <li><a href="https://www.microsoft.com/zh-cn/privacy">隐私声明</a></li>
+                <li><a href="https://www.microsoft.com/zh-cn/legal/terms-of-use">使用条款</a></li>
+                <li><a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks">商标</a></li>
+                <li><a href="https://account.microsoft.com/privacy/ad-settings?refd=www.microsoft.com">关于我们的广告</a></li>
+            </ul>
+        </div>
+    </footer>
+    <style>
+   /* styles.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+header {
+    background-color: #0078d4;
+    color: white;
+    padding: 10px 20px;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 30px;
+    margin-right: 10px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.hero {
+    background-image: url('https://via.placeholder.com/1200x400');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero-content h1 {
+    font-size: 3em;
+    margin: 0;
+}
+
+.hero-content p {
+    font-size: 1.5em;
+    margin: 10px 0 20px;
+}
+
+.btn {
+    background-color: #0078d4;
+    color: white;
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.products {
+    display: flex;
+    justify-content: space-around;
+    padding: 50px 20px;
+    background-color: #f4f4f4;
+}
+
+.product-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+.product-card h3 {
+    margin: 15px 0 10px;
+}
+
+.product-card p {
+    margin: 0 0 20px;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 0;
+}
+
+.footer-links li {
+    margin: 0 15px;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+}
+</style>
+        </body>
+        </html>

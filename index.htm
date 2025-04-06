@@ -24,7 +24,7 @@
 <header>
     <!-- 其他内容 -->
     <div id="auth-section">
-        <a href="https://xiaoyumi9243.github.io/login.htm" id="login-button">登录
+        <a href="https://xiaoyumi9243.github.io/login.htm" id="login-button"> 
  <img src="https://img0.baidu.com/it/u=2877351268,3101359067&fm=253&fmt=auto&app=138&f=JPEG?w=292&h=300" alt="登录" width="50" height="50">
 </a>
     </div>
@@ -91,9 +91,9 @@
 <input type="file" id="file" name="file">
 
     <label for="message">用途:</label><br>
-    <textarea id="message" name="message" rows="4" cols="50" placeholder="请输入你收购这个人的用途"></textarea><br><br>
-
-    <input type="submit" value="提交">
+    <textarea id="message" name="message" rows="4" cols="50" placeholder="请输入你收购这个人的用途"></textarea>
+  <a href="https://xiaoyumi9243.github.io/submit.htm">提交</a>
+</button>
     <input type="reset" value="重置">
 </form>
         </div>
@@ -229,7 +229,7 @@
     </script>
     <footer>
             <ul class="footer-links">
-                <li><a href="https://www.microsoft.com/zh-cn/privacy">隐私声明</a></li>
+                <li><a href="https://xiaoyumi9243.github.io/bug.htm">Bug反馈</a></li>
                 <li><a href="https://www.microsoft.com/zh-cn/legal/terms-of-use">使用条款</a></li>
                 <li><a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks">商标</a></li>
                 <li><a href="https://account.microsoft.com/privacy/ad-settings?refd=www.microsoft.com">关于我们的广告</a></li>
@@ -375,29 +375,5 @@ footer {
     text-decoration: none;
 }
 </style>
-<header>
-    <!-- 其他内容 -->
-    <div id="auth-section">
-        <a href="login.html" id="login-button">登录</a>
-    </div>
-</header>
-
-<script>
-    // 检查登录状态
-    document.addEventListener('DOMContentLoaded', function() {
-        const authSection = document.getElementById('auth-section');
-        
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            // 隐藏登录按钮
-            document.getElementById('login-button').style.display = 'none';
-            
-            // 显示用户信息和登出按钮
-            authSection.innerHTML = `
-                <span>欢迎, ${localStorage.getItem('currentUser')}</span>
-                <a href="logout.html">退出</a>
-            `;
-        }
-    });
-</script>
         </body>
         </html>
