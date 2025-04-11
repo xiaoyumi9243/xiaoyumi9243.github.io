@@ -5,6 +5,230 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xiaoyumi提交</title>
     <link rel="icon" href="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" type="image/x-icon">
+    
+    <style>
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Minecraft', Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            background-image: url('https://www.minecraft.net/content/dam/minecraft/touchup-2020/minecraft-background-behavior-1800x1012.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        
+        /* 像素风格导航栏 - 添加云母效果 */
+        .navbar {
+            background-color: rgba(59, 59, 59, 0.8); /* 半透明背景 */
+            border-bottom: 4px solid #6a6a6a;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            
+            /* 云母效果关键属性 */
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            
+            /* 边框效果增强 */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            
+            /* 动画过渡 */
+            transition: all 0.3s ease;
+        }
+        
+        /* 滚动时导航栏效果 */
+        .navbar.scrolled {
+            background-color: rgba(40, 40, 40, 0.9);
+            border-bottom-width: 3px;
+            padding: 10px 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            color: #72cb3b;
+            text-shadow: 2px 2px 0 #4d7a29;
+            transition: all 0.3s;
+        }
+        
+        .navbar.scrolled .logo {
+            font-size: 22px;
+        }
+        
+        /* 菜单按钮样式 */
+        .menu-button {
+            background-color: rgba(114, 203, 59, 0.9);
+            border: 3px solid #4d7a29;
+            color: white;
+            font-family: 'Minecraft', sans-serif;
+            padding: 8px 15px;
+            text-transform: uppercase;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .menu-button:hover {
+            background-color: rgba(138, 230, 62, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        /* 导航链接容器 - 初始隐藏 */
+        .nav-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background-color: rgba(59, 59, 59, 0.9);
+            border: 4px solid #6a6a6a;
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+            width: 200px;
+            
+            /* 云母效果 */
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            
+            /* 动画效果 */
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        /* 显示导航链接的类 */
+        .nav-container.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+     /* 导航链接容器 - 确保垂直布局 */
+.nav-container {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background-color: rgba(59, 59, 59, 0.9);
+    border: 4px solid #6a6a6a;
+    padding: 15px;
+    display: none;
+    flex-direction: column; /* 强制垂直排列 */
+    z-index: 999;
+    width: 200px;
+    max-height: 80vh; /* 限制最大高度 */
+    overflow-y: auto; /* 支持滚动 */
+}
+
+/* 按钮文字颜色 */
+.modal-content .pixel-button {
+    color: white; /* 确保按钮文字为白色 */
+}
+
+/* 导航链接列表 */
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex; /* 新增 */
+    flex-direction: column; /* 垂直排列 */
+}
+
+/* 每个菜单项 */
+.nav-links li {
+    width: 100%;
+    margin: 5px 0; /* 调整间距 */
+}
+
+/* 链接样式 */
+.nav-links a{
+    color: white;
+    text-decoration: none;
+    padding: 12px 16px;
+    display: block;
+    width: 100%;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.nav-links a:hover {
+    border: 2px solid #72cb3b;
+    background-color: rgba(77, 122, 41, 0.7);
+    transform: translateX(8px);
+}
+        
+        /* 页脚 */
+        footer {
+            background-color: #1a1a1a;
+            padding: 20px;
+            text-align: center;
+            border-top: 4px solid #6a6a6a;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1; /* 确保页脚在弹窗下方 */
+        }
+        
+        .social-links {
+            margin: 15px 0;
+        }
+        
+        .social-links a {
+            margin: 0 10px;
+            color: #72cb3b;
+            text-decoration: none;
+        }
+        
+        .modal-content {
+            background-color: #3b3b3b;
+            border: 4px solid #6a6a6a;
+            padding: 25px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            
+            /* 云母效果 */
+            backdrop-filter: blur(10px) saturate(160%);
+            -webkit-backdrop-filter: blur(10px) saturate(160%);
+            background-color: rgba(59, 59, 59, 0.85);
+        }
+        
+        .modal-title {
+            color: #72cb3b;
+            margin-top: 0;
+            border-bottom: 3px solid #4d7a29;
+            padding-bottom: 10px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #3b3b3b;
+            border: 2px solid #6a6a6a;
+            color: white;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .close-modal:hover {
+            background-color: #6a6a6a;
+        }
+        
+    </style>
+</head>  
+<link rel="icon" href="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -106,194 +330,25 @@
             right: 10px;
         }
     </style>
-    <style>
-   /* styles.css */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    color: #333;
-}
-
-header {
-    background-color: #0078d4;
-    color: white;
-    padding: 10px 20px;
-}
-
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-}
-
-.logo img {
-    height: 30px;
-    margin-right: 10px;
-}
-
-.nav-links {
-    list-style: none;
-    display: flex;
-    margin: 0;
-    padding: 0;
-}
-
-.nav-links li {
-    margin: 0 15px;
-}
-
-.nav-links a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.nav-right a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.hero {
-    background-image: url('https://via.placeholder.com/1200x400');
-    background-size: cover;
-    background-position: center;
-    color: white;
-    text-align: center;
-    padding: 100px 20px;
-}
-
-.hero-content h1 {
-    font-size: 3em;
-    margin: 0;
-}
-
-.hero-content p {
-    font-size: 1.5em;
-    margin: 10px 0 20px;
-}
-
-.btn {
-    background-color: #0078d4;
-    color: white;
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
-}
-
-.products {
-    display: flex;
-    justify-content: space-around;
-    padding: 50px 20px;
-    background-color: #f4f4f4;
-}
-
-.product-card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.product-card img {
-    max-width: 100%;
-    border-radius: 10px;
-}
-
-.product-card h3 {
-    margin: 15px 0 10px;
-}
-
-.product-card p {
-    margin: 0 0 20px;
-}
-
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 20px;
-}
-
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.footer-links {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    margin: 10px 0 0;
-}
-
-.footer-links li {
-    margin: 0 15px;
-}
-
-.footer-links a {
-    color: white;
-    text-decoration: none;
-}
-</style>
-<header>
-        <nav>
-            <div class="logo">
-                <img src="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" alt="Logo">
-                <span>xiaoyumi</span>
-            </div>
-            <ul class="nav-links">
-               <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
-                <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
-               <a href="https://4399.com">
-  <img src="https://img1.baidu.com/it/u=3287677374,718479402&fm=253&fmt=auto&app=138&f=JPEG?w=400&h=400" alt="示例图片" width="50" height="50">
-</a>
-            </ul>
-            <div class="nav-right">
-<header>
-    <!-- 其他内容 -->
-    <div id="auth-section">
-        <a href="https://xiaoyumi9243.github.io/login.htm" id="login-button"> 
- <img src="https://img0.baidu.com/it/u=2877351268,3101359067&fm=253&fmt=auto&app=138&f=JPEG?w=292&h=300" alt="登录" width="50" height="50">
-</a>
+<nav class="navbar">
+    <div class="logo">xiaoyumi</div>
+    <button class="menu-button" id="menuToggle">菜单</button>
+    <div class="nav-container" id="navContainer">
+        <ul class="nav-links">
+            <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
+            <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/games.htm">游戏</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/login.htm">登录</a></li>
+        </ul>
     </div>
-</header>
-
-<script>
-    // 检查登录状态
-    document.addEventListener('DOMContentLoaded', function() {
-        const authSection = document.getElementById('auth-section');
-        
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            // 隐藏登录按钮
-            document.getElementById('login-button').style.display = 'none';
-            
-            // 显示用户信息和登出按钮
-            authSection.innerHTML = `
-                <span>欢迎, ${localStorage.getItem('currentUser')}</span>
-                <a href="logout.html">退出</a>
-            `;
-        }
-    });
-</script>
-            </div>
-        </nav>
-    </header>
+</nav>
+            <div class="nav-right">
     <div style="
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 300px;
+    height: 400px;
     border: 1px solid #ddd;
 ">
     <img src="https://xiaoyumi9243.github.io/x.png" alt="示例图片" style="width: 150px; margin-bottom: 10px;">
@@ -303,13 +358,193 @@ footer {
 <p>·没有连接到网络</p>
 <p>·信息填写错误</p>
 <footer>
-            <ul class="footer-links">
-            <li><a href="https://xiaoyumi9243.github.io/">首页</a></li>
-               <li><a href="https://xiaoyumi9243.github.io/bug.htm">Bug反馈</a></li>
-                <li><a href="https://www.microsoft.com/zh-cn/legal/terms-of-use">使用条款</a></li>
-                <li><a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks">商标</a></li>
-                <li><a href="https://account.microsoft.com/privacy/ad-settings?refd=www.microsoft.com">关于我们的广告</a></li>
-            </ul>
-        </div>
-    </footer>
+    <!-- 原有内容保持不变 -->
+    <button class="theme-toggle" id="themeToggle">🌓 切换主题</button>
+    <div class="social-links">
+<a href="https://xiaoyumi9243.github.io/bug.htm">Bug反馈</a>
+    </div>
+    <p>此网站为xiaoyumi私人网站</p>
+    <p>此网站仅为演示用途</p>
+</footer>
 </body>
+<style>
+/* 新增主题相关样式 */
+:root {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --card-bg: #3b3b3b;
+    --accent-color: #72cb3b;
+    --border-color: #6a6a6a;
+    --footer-bg: #1a1a1a;
+    --modal-text: #ffffff;
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --input-text: #ffffff;
+}
+
+[data-theme="light"] {
+    --bg-color: #f0f0f0;
+    --text-color: #333;
+    --card-bg: #ffffff;
+    --border-color: #4d7a29;
+    --footer-bg: #e0e0e0;
+    --modal-text: #333333;
+    --input-bg: rgba(0, 0, 0, 0.05);
+    --input-text: #333333;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+/* 页脚样式 */
+footer {
+    background-color: var(--footer-bg);
+    padding: 20px;
+    text-align: center;
+    border-top: 4px solid var(--border-color);
+    margin-top: 40px;
+    position: relative;
+    z-index: 1;
+}
+.modal-content input,
+.modal-content textarea {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--input-text);
+}
+
+/* 其他需要适配主题的元素 */
+.content-section,
+.feature-card,
+.modal-content,
+.product-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+    background-color: var(--accent-color);
+    border: 2px solid #4d7a29;
+    color: white;
+    padding: 8px 15px;
+    margin: 15px 0;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+    background-color: var(--accent-color);
+    border: 2px solid #4d7a29;
+    color: white;
+    padding: 8px 15px;
+    margin: 15px 0;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* 调整其他需要适配主题的元素 */
+.content-section,
+.feature-card,
+.modal-content {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+</style>
+<script>
+        // 菜单切换功能
+        const menuToggle = document.getElementById('menuToggle');
+        const navContainer = document.getElementById('navContainer');
+        
+        menuToggle.addEventListener('click', function() {
+            navContainer.classList.toggle('show');
+            
+            // 更改按钮文本
+            if (navContainer.classList.contains('show')) {
+                menuToggle.textContent = '关闭';
+            } else {
+                menuToggle.textContent = '菜单';
+            }
+        });
+        
+        // 点击页面其他区域关闭菜单
+        document.addEventListener('click', function(event) {
+            if (!navContainer.contains(event.target) && event.target !== menuToggle) {
+                navContainer.classList.remove('show');
+                menuToggle.textContent = '菜单';
+            }
+        });
+        
+        // 弹窗控制代码
+        const showModalBtn = document.getElementById('showModalBtn');
+        const announcementModal = document.getElementById('announcementModal');
+        const closeAnnouncement = document.getElementById('closeAnnouncement');
+        
+        showModalBtn.addEventListener('click', function() {
+            announcementModal.style.display = 'flex';
+        });
+        
+        closeAnnouncement.addEventListener('click', function() {
+            announcementModal.style.display = 'none';
+        });
+        
+        announcementModal.addEventListener('click', function(e) {
+            if (e.target === announcementModal) {
+                announcementModal.style.display = 'none';
+            }
+        });
+    </script>
+    <script>
+// 获取DOM元素
+const themeToggle = document.getElementById('themeToggle');
+const body = document.body;
+
+// 主题切换函数
+themeToggle.addEventListener('click', () => {
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // 更新按钮图标和文字
+    themeToggle.textContent = newTheme === 'dark' ? '🌓 夜间模式' : '🌞 白天模式';
+    
+    // 强制重绘弹窗内容
+    const modal = document.getElementById('announcementModal');
+    if(modal.style.display === 'flex') {
+        modal.style.display = 'none';
+        setTimeout(() => { modal.style.display = 'flex' }, 10);
+    }
+});
+
+// 初始化主题 - 添加这部分代码
+(function() {
+    // 从本地存储获取主题设置，如果没有则默认为dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    body.setAttribute('data-theme', savedTheme);
+    
+    // 设置按钮初始文本
+    themeToggle.textContent = savedTheme === 'dark' ? '🌓 夜间模式' : '🌞 白天模式';
+})();
+</script>
+</body>
+</html>
+    

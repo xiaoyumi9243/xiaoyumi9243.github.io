@@ -5,152 +5,326 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xiaoyumi购买</title>
     <link rel="icon" href="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" type="image/x-icon">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    .nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav-links li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(106, 106, 106, 0.5);
+}
+
+.nav-links li:last-child {
+    border-bottom: none;
+}
+
+.nav-links a {
+    color: #e0e0e0;
+    text-decoration: none;
+    display: block;
+    padding: 5px 10px;
+    transition: all 0.3s;
+}
+
+.nav-links a:hover {
+    color: #72cb3b;
+    background-color: rgba(114, 203, 59, 0.1);
+}
+        /* 字体 - 可以使用本地字体或从网络加载 */
+        @font-face {
+            font-family: 'Minecraft';
+            src: url('https://fonts.cdnfonts.com/css/minecraft-4') format('woff2');
         }
         
         body {
-            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-family: 'Minecraft', Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            background-image: url('https://www.minecraft.net/content/dam/minecraft/touchup-2020/minecraft-background-behavior-1800x1012.jpg');
+            background-size: cover;
+            background-attachment: fixed;
         }
         
-        .carousel-container {
-            max-width: 800px;
-            margin: 20px auto;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .carousel-slides {
-            display: flex;
-            transition: transform 0.5s ease-in-out;
-        }
-        
-        .carousel-slide {
-            min-width: 100%;
-        }
-        
-        .carousel-slide img {
-            width: 100%;
-            display: block;
-        }
-        
-        .carousel-caption {
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px;
+        /* 像素风格导航栏 - 添加云母效果 */
+        .navbar {
+            background-color: rgba(59, 59, 59, 0.8); /* 半透明背景 */
+            border-bottom: 4px solid #6a6a6a;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            
+            /* 云母效果关键属性 */
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            
+            /* 边框效果增强 */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            
+            /* 动画过渡 */
+            transition: all 0.3s ease;
         }
         
-        .carousel-text {
-            flex-grow: 1;
+        /* 滚动时导航栏效果 */
+        .navbar.scrolled {
+            background-color: rgba(40, 40, 40, 0.9);
+            border-bottom-width: 3px;
+            padding: 10px 20px;
         }
         
-        .carousel-btn {
-            padding: 8px 15px;
-            background: #ff5722;
+        .logo {
+            font-size: 24px;
+            color: #72cb3b;
+            text-shadow: 2px 2px 0 #4d7a29;
+            transition: all 0.3s;
+        }
+        
+        .navbar.scrolled .logo {
+            font-size: 22px;
+        }
+        
+        /* 菜单按钮样式 */
+        .menu-button {
+            background-color: rgba(114, 203, 59, 0.9);
+            border: 3px solid #4d7a29;
             color: white;
-            border: none;
-            border-radius: 4px;
+            font-family: 'Minecraft', sans-serif;
+            padding: 8px 15px;
+            text-transform: uppercase;
+            font-size: 1rem;
             cursor: pointer;
-            text-decoration: none;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .menu-button:hover {
+            background-color: rgba(138, 230, 62, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        /* 导航链接容器 - 初始隐藏 */
+        .nav-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background-color: rgba(59, 59, 59, 0.9);
+            border: 4px solid #6a6a6a;
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+            width: 200px;
+            
+            /* 云母效果 */
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            
+            /* 动画效果 */
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        /* 显示导航链接的类 */
+        .nav-container.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+     /* 导航链接容器 - 确保垂直布局 */
+.nav-container {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background-color: rgba(59, 59, 59, 0.9);
+    border: 4px solid #6a6a6a;
+    padding: 15px;
+    display: none;
+    flex-direction: column; /* 强制垂直排列 */
+    z-index: 999;
+    width: 200px;
+    max-height: 80vh; /* 限制最大高度 */
+    overflow-y: auto; /* 支持滚动 */
+}
+/* 英雄区域 */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-top: 70px;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            color: #72cb3b;
+            text-shadow: 4px 4px 0 #4d7a29;
+            margin-bottom: 20px;
+        }
+        /* 像素风格按钮 */
+        .pixel-button {
+            background-color: #72cb3b;
+            border: 3px solid #4d7a29;
+            color: white;
+            font-family: 'Minecraft', sans-serif;
+            padding: 12px 25px;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pixel-button:hover {
+            background-color: #8ae63e;
+            transform: translateY(-2px);
+        }
+        
+        /* 内容区块 */
+        .content-section {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(27, 27, 27, 0.9);
+            border: 4px solid #6a6a6a;
+            margin-top: 20px;
+        }
+        .section-title {
+            color: #72cb3b;
+            border-bottom: 3px solid #4d7a29;
+            padding-bottom: 10px;
             display: inline-block;
         }
         
-        .carousel-btn:hover {
-            background: #e64a19;
+        /* 游戏特性卡片 */
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 30px;
         }
         
-        .carousel-nav {
+        .feature-card {
+            width: 280px;
+            background-color: #3b3b3b;
+            border: 3px solid #6a6a6a;
+            padding: 20px;
+            margin: 15px;
+            text-align: center;
+        }
+        
+        .feature-card h3 {
+            color: #72cb3b;
+        }
+        
+        /* 页脚 */
+        footer {
+            background-color: #1a1a1a;
+            padding: 20px;
+            text-align: center;
+            border-top: 4px solid #6a6a6a;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1; /* 确保页脚在弹窗下方 */
+        }
+        
+        .social-links {
+            margin: 15px 0;
+        }
+        
+        .social-links a {
+            margin: 0 10px;
+            color: #72cb3b;
+            text-decoration: none;
+        }
+        
+        /* 弹窗样式 - Minecraft风格 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000; /* 高于所有其他元素 */
+        }
+        
+        .modal-content {
+            background-color: #3b3b3b;
+            border: 4px solid #6a6a6a;
+            padding: 25px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            
+            /* 云母效果 */
+            backdrop-filter: blur(10px) saturate(160%);
+            -webkit-backdrop-filter: blur(10px) saturate(160%);
+            background-color: rgba(59, 59, 59, 0.85);
+        }
+        
+        .modal-title {
+            color: #72cb3b;
+            margin-top: 0;
+            border-bottom: 3px solid #4d7a29;
+            padding-bottom: 10px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #3b3b3b;
+            border: 2px solid #6a6a6a;
+            color: white;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;
             display: flex;
             justify-content: center;
-            margin-top: 10px;
+            align-items: center;
         }
         
-        .carousel-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ccc;
-            margin: 0 5px;
-            cursor: pointer;
+        .close-modal:hover {
+            background-color: #6a6a6a;
         }
         
-        .carousel-dot.active {
-            background: #333;
-        }
-        
-        .carousel-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .carousel-arrow.prev {
-            left: 10px;
-        }
-        
-        .carousel-arrow.next {
-            right: 10px;
-        }
     </style>
 </head>
 <body>
-<header>
-        <nav>
-            <div class="logo">
-                <img src="https://img0.baidu.com/it/u=2161498278,4294936884&fm=253&fmt=auto&app=138&f=JPEG?w=708&h=500/" alt="Logo">
-                <span>xiaoyumi</span>
-            </div>
-            <ul class="nav-links">
-               <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
-                <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
-               <a href="https://4399.com">
-  <img src="https://img1.baidu.com/it/u=3287677374,718479402&fm=253&fmt=auto&app=138&f=JPEG?w=400&h=400" alt="示例图片" width="50" height="50">
-</a>
-            </ul>
-            <div class="nav-right">
-<header>
-    <!-- 其他内容 -->
-    <div id="auth-section">
-        <a href="https://xiaoyumi9243.github.io/login.htm" id="login-button"> 
- <img src="https://img0.baidu.com/it/u=2877351268,3101359067&fm=253&fmt=auto&app=138&f=JPEG?w=292&h=300" alt="登录" width="50" height="50">
-</a>
+    <!-- 导航栏 -->
+<nav class="navbar">
+    <div class="logo">xiaoyumi</div>
+    <button class="menu-button" id="menuToggle">菜单</button>
+    <div class="nav-container" id="navContainer">
+        <ul class="nav-links">
+            <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
+            <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/games.htm">游戏</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/login.htm">登录</a></li>
+        </ul>
     </div>
-</header>
-
-<script>
-    // 检查登录状态
-    document.addEventListener('DOMContentLoaded', function() {
-        const authSection = document.getElementById('auth-section');
-        
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            // 隐藏登录按钮
-            document.getElementById('login-button').style.display = 'none';
-            
-            // 显示用户信息和登出按钮
-            authSection.innerHTML = `
-                <span>欢迎, ${localStorage.getItem('currentUser')}</span>
-                <a href="logout.html">退出</a>
-            `;
-        }
-    });
-</script>
-            </div>
-        </nav>
-    </header>
+</nav>
 <div class="carousel-container">
         <!-- 图片轮播部分 -->
         <div class="carousel-slides">
@@ -279,6 +453,17 @@
     </script>
     <section class="products">
         <div class="product-card">
+            <img src="https://img2.baidu.com/it/u=303560653,3109790051&fm=253&fmt=auto&app=138&f=JPEG?w=778&h=500" alt="产品2">
+            <a>智障才会用的游戏机</a>
+            <p>不仅不好用而且还超级发烫</p>
+            <a href="https://mitem.jd.hk/product/25175059796.html?ad_od=3" class="btn">购买</a>
+            
+        </div>
+        </div>
+
+    </section>
+    <section class="products">
+        <div class="product-card">
             <img src="https://qingyun.huawei.com/content/dam/huawei-cbg-site/qingyun/mkt/pdp/tablets/qingyun-c7-2nd/images/kv/huawei-qingyun-c7-2nd-kv-xs.webp" alt="产品1">
             <a>比虫子还要智障的电脑</a>
             <p>轻薄设计，弱化性能</p>
@@ -301,7 +486,13 @@
         <img src="https://img0.baidu.com/it/u=1076133456,3606808142&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=800" alt="产品1">
             <a>破烂电脑只需1万元即可拿到</a>
             <a href="https://lp.pinduoduo.com/poros/h5?ads_channel=baidu_sem&ads_account=41594336&ads_set=302129887&ads_id=8266479587&keywordid=597327824503&exp_id=41&keyword=&outer_id=04-Hwx27yWlsAz6Jx9XoIB5Eg&_p_sem_ver=20250219&segmentid=null&creative_id=74200578230&match_type=1&trig_flag=nm&content_id={content_id}&page_uid=f1374bd20cf447d6be4a6e2817465c6a&bd_vid=nH0kP10sPWD1PWT4PHmLnWmYnWuxnWc1g17xnH0sg1wxP1fznj0dP16zn10#back" class="btn">购买</a>
- <a>由xiaoyumi打造的游戏</a>
+  <h5>今日推荐视频</h5>
+ <audio controls>
+  <source src="你的音乐文件路径.mp3" type="audio/mpeg">
+  <source src="https://xiaoyumi9243.github.io/music.ogg" type="audio/ogg">
+  你的浏览器不支持音频播放。
+</audio>
+<a>由xiaoyumi打造的游戏</a>
 <img src="https://nb-data.klpbbs.com/forum/202503/30/133818a6rq64qbgps42eng.jpg" alt="产品1">
 <a>超级恐怖画风，吓死你</a>
 <a href="https://klpbbs.com/thread-159796-1-1.html" class="btn">查看详情</a>
@@ -324,16 +515,14 @@
 </div><div style="text-align: center;">
   正在全力加载更多商品
 </div>
+<button class="theme-toggle" id="themeToggle">🌓 切换主题</button>
 <footer>
-            <ul class="footer-links">
-            <li><a href="https://xiaoyumi9243.github.io/">首页</a></li>
-                <li><a href="https://xiaoyumi9243.github.io/bug.htm">Bug反馈</a></li>
-                <li><a href="https://www.microsoft.com/zh-cn/legal/terms-of-use">使用条款</a></li>
-                <li><a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks">商标</a></li>
-                <li><a href="https://account.microsoft.com/privacy/ad-settings?refd=www.microsoft.com">关于我们的广告</a></li>
-            </ul>
-        </div>
-    </footer>
+            <div class="social-links">
+<a href="https://xiaoyumi9243.github.io/bug.htm">Bug反馈</a>
+    </div>
+    <p>此网站为xiaoyumi私人网站</p>
+    <p>此网站仅为演示用途</p>
+</footer>
 </body>
 <style>
    /* styles.css */
@@ -407,72 +596,18 @@ nav {
     font-size: 1.5em;
     margin: 10px 0 20px;
 }
-
-.btn {
-    background-color: #0078d4;
-    color: white;
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
-}
-
-.products {
-    display: flex;
-    justify-content: space-around;
-    padding: 50px 20px;
-    background-color: #f4f4f4;
-}
-
-.product-card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.product-card img {
-    max-width: 100%;
-    border-radius: 10px;
-}
-
-.product-card h3 {
-    margin: 15px 0 10px;
-}
-
-.product-card p {
-    margin: 0 0 20px;
-}
-
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 20px;
-}
-
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.footer-links {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    margin: 10px 0 0;
-}
-
-.footer-links li {
-    margin: 0 15px;
-}
-
-.footer-links a {
-    color: white;
-    text-decoration: none;
-}
+.carousel-caption {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .carousel-text {
+            flex-grow: 1;
+        }
 </style>
 <style>
 .small-slide {
@@ -480,4 +615,345 @@ footer {
     object-fit: cover;
 }
 </style>
+<style>
+/* 新增主题相关样式 */
+:root {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --card-bg: #3b3b3b;
+    --accent-color: #72cb3b;
+    --border-color: #6a6a6a;
+    --footer-bg: #1a1a1a;
+    --modal-text: #ffffff;
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --input-text: #ffffff;
+}
+
+[data-theme="light"] {
+    --bg-color: #f0f0f0;
+    --text-color: #333;
+    --card-bg: #ffffff;
+    --border-color: #4d7a29;
+    --footer-bg: #e0e0e0;
+    --modal-text: #333333;
+    --input-bg: rgba(0, 0, 0, 0.05);
+    --input-text: #333333;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+/* 页脚样式 */
+footer {
+    background-color: var(--footer-bg);
+    padding: 20px;
+    text-align: center;
+    border-top: 4px solid var(--border-color);
+    margin-top: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+/* 其他需要适配主题的元素 */
+.content-section,
+.feature-card,
+.modal-content,
+.product-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+    background-color: var(--accent-color);
+    border: 2px solid #4d7a29;
+    color: white;
+    padding: 8px 15px;
+    margin: 15px 0;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* 修改产品卡片颜色 */
+.product-card {
+    background-color: var(--card-bg);
+    border: 3px solid var(--border-color);
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .product-card img {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+    background-color: var(--accent-color);
+    border: 2px solid #4d7a29;
+    color: white;
+    padding: 8px 15px;
+    margin: 15px 0;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* 调整其他需要适配主题的元素 */
+.content-section,
+.feature-card,
+.modal-content {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+</style>
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        .carousel-container {
+            max-width: 800px;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .carousel-slides {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .carousel-slide {
+            min-width: 100%;
+        }
+        
+        .carousel-slide img {
+            width: 100%;
+            display: block;
+        } 
+        .carousel-btn {
+            padding: 8px 15px;
+            background: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .carousel-btn:hover {
+            background: #e64a19;
+        }
+        
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        
+        .carousel-dot.active {
+            background: #333;
+        }
+        
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .carousel-arrow.prev {
+            left: 10px;
+        }
+        
+        .carousel-arrow.next {
+            right: 10px;
+        }
+    </style>
+    <style>
+/* 商品卡片 */
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    background-color: var(--bg-color);
+}
+
+.product-card {
+    background-color: var(--card-bg);
+    border: 3px solid var(--border-color);
+    padding: 15px;
+    border-radius: 8px;
+    transition: transform 0.3s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    margin-bottom: 10px;
+}
+
+.product-card a {
+    color: var(--text-color);
+    text-decoration: none;
+    display: block;
+    margin: 5px 0;
+}
+
+.product-card .btn {
+    display: inline-block;
+    background-color: var(--accent-color);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    transition: all 0.3s;
+}
+
+.product-card .btn:hover {
+    background-color: #8ae63e;
+    transform: translateY(-2px);
+}
+.pixel-button {
+    background-color: #72cb3b;
+    border: 3px solid #4d7a29;
+    color: white;
+    font-family: 'Minecraft', sans-serif;
+    padding: 12px 25px;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 10px 5px;
+}
+
+.pixel-button:hover {
+    background-color: #8ae63e;
+    transform: translateY(-2px);
+}
+</style>
+<script>
+        // 菜单切换功能
+        const menuToggle = document.getElementById('menuToggle');
+        const navContainer = document.getElementById('navContainer');
+        
+        menuToggle.addEventListener('click', function() {
+            navContainer.classList.toggle('show');
+            
+            // 更改按钮文本
+            if (navContainer.classList.contains('show')) {
+                menuToggle.textContent = '关闭';
+            } else {
+                menuToggle.textContent = '菜单';
+            }
+        });
+        
+        // 点击页面其他区域关闭菜单
+        document.addEventListener('click', function(event) {
+            if (!navContainer.contains(event.target) && event.target !== menuToggle) {
+                navContainer.classList.remove('show');
+                menuToggle.textContent = '菜单';
+            }
+        });
+        
+        // 弹窗控制代码
+        const showModalBtn = document.getElementById('showModalBtn');
+        const announcementModal = document.getElementById('announcementModal');
+        const closeAnnouncement = document.getElementById('closeAnnouncement');
+        
+        showModalBtn.addEventListener('click', function() {
+            announcementModal.style.display = 'flex';
+        });
+        
+        closeAnnouncement.addEventListener('click', function() {
+            announcementModal.style.display = 'none';
+        });
+        
+        announcementModal.addEventListener('click', function(e) {
+            if (e.target === announcementModal) {
+                announcementModal.style.display = 'none';
+            }
+        });
+    </script>
+    <script>
+// 获取DOM元素
+const themeToggle = document.getElementById('themeToggle');
+const body = document.body;
+
+// 主题切换函数
+themeToggle.addEventListener('click', () => {
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // 更新按钮图标和文字
+    themeToggle.textContent = newTheme === 'dark' ? '🌓 夜间模式' : '🌞 白天模式';
+    
+    // 强制重绘弹窗内容
+    const modal = document.getElementById('announcementModal');
+    if(modal.style.display === 'flex') {
+        modal.style.display = 'none';
+        setTimeout(() => { modal.style.display = 'flex' }, 10);
+    }
+});
+
+// 初始化主题 - 添加这部分代码
+(function() {
+    // 从本地存储获取主题设置，如果没有则默认为dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    body.setAttribute('data-theme', savedTheme);
+    
+    // 设置按钮初始文本
+    themeToggle.textContent = savedTheme === 'dark' ? '🌓 夜间模式' : '🌞 白天模式';
+})();
+</script>
 </html>
