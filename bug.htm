@@ -126,13 +126,13 @@
         
         .bug-desc {
             margin-top: 0.5rem;
-            display: none; /* 默认隐藏描述 */
+            display: none;
             padding-top: 10px;
             border-top: 1px dashed #eee;
         }
         
         .bug-desc.expanded {
-            display: block; /* 展开时显示 */
+            display: block;
         }
         
         .severity-high {
@@ -146,6 +146,7 @@
         .severity-low {
             color: #2ecc71;
         }
+        
         .toggle-btn {
             background: none;
             border: none;
@@ -173,6 +174,15 @@
             border-radius: 4px;
             margin-bottom: 1.5rem;
             display: none;
+        }
+        
+        .clear-btn {
+            background-color: #e74c3c;
+            margin-left: 10px;
+        }
+        
+        .clear-btn:hover {
+            background-color: #c0392b;
         }
     </style>
 </head>
@@ -226,41 +236,81 @@
                 </div>
                 
                 <button type="submit" class="btn">提交Bug报告</button>
+                <button type="button" id="clear-all" class="btn clear-btn">清空所有Bug</button>
             </form>
         </div>
         
         <div class="card">
-            <h2>已提交的Bug</h2>
+            <h2>已提交的Bug <span id="bug-count">(0)</span></h2>
             <ul class="bug-list" id="bug-list">
                 <!-- Bug列表将通过JavaScript动态生成 -->
-                <li class="bug-item">
-                    <div class="bug-header">
-                        <div>
-                            <div class="bug-title">示例Bug: 登录页面无法加载</div>
-                            <div class="bug-meta">
-                                <span class="severity-high">高优先级</span> | 
-                                提交于 2023-06-15 | 
-                                提交者: user@example.com
-                            </div>
-                        </div>
-                        <button class="toggle-btn">展开详情</button>
-                    </div>
-                    <div class="bug-desc">
-                        当点击登录按钮时，页面卡住不动，控制台显示500错误。重现步骤：
-                        1. 访问登录页面
-                        2. 输入任意用户名和密码
-                        3. 点击登录按钮
-                        4. 页面卡住，控制台显示500错误
-                    </div>
-                </li>
             </ul>
         </div>
     </div>
+    
     <footer>
-        <p>待开发区域</p>
+        <p>bug反馈页面待升级，如有问题可在此页面提交</p>
     </footer>
 
     <script>
+        // Cookie操作函数
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (JSON.stringify(value) || "") + expires + "; path=/";
+        }
+        
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) {
+                    const cookieValue = c.substring(nameEQ.length, c.length);
+                    try {
+                        return JSON.parse(cookieValue);
+                    } catch (e) {
+                        return cookieValue;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        function eraseCookie(name) {
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+        
+        // Bug数据管理
+        const COOKIE_NAME = "bugReports";
+        
+        function saveBugsToCookie(bugs) {
+            setCookie(COOKIE_NAME, bugs, 30); // 保存30天
+            updateBugCount();
+        }
+        
+        function getBugsFromCookie() {
+            return getCookie(COOKIE_NAME) || [];
+        }
+        
+        function clearAllBugs() {
+            if (confirm("确定要清空所有Bug报告吗？此操作不可撤销！")) {
+                eraseCookie(COOKIE_NAME);
+                document.getElementById('bug-list').innerHTML = '';
+                updateBugCount();
+            }
+        }
+        
+        function updateBugCount() {
+            const bugs = getBugsFromCookie();
+            document.getElementById('bug-count').textContent = `(${bugs.length})`;
+        }
+        
         // 表单提交处理
         document.getElementById('bug-form').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -270,18 +320,22 @@
                 title: document.getElementById('title').value,
                 description: document.getElementById('description').value,
                 severity: document.getElementById('severity').value,
+ description: document.getElementById('description').value,
+                severity: document.getElementById('severity').value,
                 email: document.getElementById('email').value,
                 browser: document.getElementById('browser').value,
                 os: document.getElementById('os').value,
-                date: new Date().toISOString().split('T')[0]
+                date: new Date().toISOString().split('T')[0],
+                id: Date.now() // 添加唯一ID
             };
             
-            // 在实际应用中，这里应该发送数据到服务器
-            // 这里我们只是模拟提交
-            console.log('Bug提交:', formData);
+            // 获取现有Bug并添加新Bug
+            const existingBugs = getBugsFromCookie();
+            existingBugs.unshift(formData); // 添加到开头
+            saveBugsToCookie(existingBugs);
             
-            // 添加到Bug列表
-            addBugToList(formData);
+            // 重新加载Bug列表
+            loadBugs();
             
             // 显示成功消息
             document.getElementById('success-message').style.display = 'block';
@@ -294,6 +348,9 @@
                 document.getElementById('success-message').style.display = 'none';
             }, 3000);
         });
+        
+        // 清空按钮事件
+        document.getElementById('clear-all').addEventListener('click', clearAllBugs);
         
         // 添加Bug到列表
         function addBugToList(bug) {
@@ -312,6 +369,7 @@
             
             const bugItem = document.createElement('li');
             bugItem.className = 'bug-item';
+            bugItem.dataset.id = bug.id;
             bugItem.innerHTML = `
                 <div class="bug-header">
                     <div>
@@ -324,13 +382,13 @@
                     </div>
                     <button class="toggle-btn">展开详情</button>
                 </div>
-                <div class="bug-desc">${bug.description}</div>
+                <div class="bug-desc">${bug.description.replace(/\n/g, '<br>')}</div>
             `;
             
-            // 添加到列表顶部
-            bugList.insertBefore(bugItem, bugList.firstChild);
+            // 添加到列表
+            bugList.appendChild(bugItem);
             
-            // 为新添加的Bug添加点击事件
+            // 为Bug项添加点击事件
             addToggleEvent(bugItem);
         }
         
@@ -345,38 +403,19 @@
             });
         }
         
-        // 页面加载时可以从服务器加载已有的Bug列表
-        // 这里我们只是添加一些示例数据
-        window.addEventListener('DOMContentLoaded', () => {
-            const exampleBugs = [
-                {
-                    title: "移动端菜单无法展开",
-                    description: "在iPhone Safari浏览器上，点击菜单按钮没有反应。重现步骤：\n1. 使用iPhone打开网站\n2. 点击右上角菜单按钮\n3. 菜单没有展开\n预期结果：菜单应该展开显示导航选项",
-                    severity: "medium",
-                    email: "user2@example.com",
-                    browser: "Safari iOS 15",
-                    os: "iOS 15",
-                    date: "2023-06-14"
-                },
-                {
-                    title: "图片上传大小限制提示不明确",
-                    description: "上传大于2MB的图片时只显示'上传失败'，没有说明原因。\n\n建议：当上传失败时，应该显示具体原因，如'图片大小不能超过2MB'。",
-                    severity: "low",
-                    email: "",
-                    browser: "Chrome 102",
-                    os: "Windows 10",
-                    date: "2023-06-13"
-                }
-            ];
+        // 加载所有Bug到列表
+        function loadBugs() {
+            const bugList = document.getElementById('bug-list');
+            bugList.innerHTML = '';
             
-            exampleBugs.forEach(bug => addBugToList(bug));
+            const bugs = getBugsFromCookie();
+            bugs.forEach(bug => addBugToList(bug));
             
-            // 为示例Bug添加点击事件
-            document.querySelectorAll('.bug-item').forEach(item => {
-                addToggleEvent(item);
-            });
-        });
+            updateBugCount();
+        }
+        
+        // 页面加载时从Cookie加载Bug列表
+        window.addEventListener('DOMContentLoaded', loadBugs);
     </script>
-    注:本功能还在开发中，有些功能无法正常使用
 </body>
 </html>
