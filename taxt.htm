@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>本地文件编辑器 - 带状态显示</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6;
+        }
+        textarea { 
+            width: 100%; 
+            height: 300px; 
+            margin: 10px 0; 
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button { 
+            padding: 8px 16px; 
+            margin-right: 10px; 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 4px;
+        }
+        button:hover { background: #45a049; }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .status-container {
+            margin: 15px 0;
+            min-height: 50px;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin: 5px 0;
+            display: none;
+        }
+        .status.info {
+            background: #e7f3fe;
+            border-left: 5px solid #2196F3;
+            display: block;
+        }
+        .status.success {
+            background: #ddffdd;
+            border-left: 5px solid #4CAF50;
+        }
+        .status.error {
+            background: #ffdddd;
+            border-left: 5px solid #f44336;
+        }
+        .file-info {
+            font-style: italic;
+            color: #666;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>本地文本文件编辑器</h1>
+    
+    <div>
+        <input type="file" id="fileInput" accept=".txt">
+        <button id="downloadBtn" disabled>保存文件</button>
+    </div>
+    
+    <div class="file-info" id="fileInfo">未选择文件</div>
+    
+    <textarea id="content" placeholder="请先选择要编辑的文件..."></textarea>
+    
+    <div class="status-container">
+        <div id="statusBlob" class="status">正在处理blob数据...</div>
+        <div id="statusSuccess" class="status">文件保存成功!</div>
+        <div id="statusError" class="status">发生错误!</div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const fileInput = document.getElementById('fileInput');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const content = document.getElementById('content');
+        const fileInfo = document.getElementById('fileInfo');
+        const statusBlob = document.getElementById('statusBlob');
+        const statusSuccess = document.getElementById('statusSuccess');
+        const statusError = document.getElementById('statusError');
+        
+        // 当前文件名
+        let currentFileName = '';
+        
+        // 显示状态函数
+        function showStatus(type, message = '') {
+            // 隐藏所有状态
+            statusBlob.style.display = 'none';
+            statusSuccess.style.display = 'none';
+            statusError.style.display = 'none';
+            
+            // 显示指定状态
+            switch(type) {
+                case 'blob':
+                    statusBlob.textContent = message || '正在处理blob数据...';
+                    statusBlob.className = 'status info';
+                    statusBlob.style.display = 'block';
+                    break;
+                case 'success':
+                    statusSuccess.textContent = message || '文件保存成功!';
+                    statusSuccess.className = 'status success';
+                    statusSuccess.style.display = 'block';
+                    break;
+                case 'error':
+                    statusError.textContent = message || '发生错误!';
+                    statusError.className = 'status error';
+                    statusError.style.display = 'block';
+                    break;
+            }
+        }
+        
+        // 读取文件
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            currentFileName = file.name;
+            fileInfo.textContent = `当前文件: ${currentFileName}`;
+            downloadBtn.disabled = false;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                content.value = e.target.result;
+                showStatus('success', '文件加载完成!');
+            };
+            reader.onerror = function() {
+                showStatus('error', '读取文件失败!');
+            };
+            reader.readAsText(file);
+        });
+        
+        // 保存文件
+        downloadBtn.addEventListener('click', function() {
+            if (!content.value.trim()) {
+                showStatus('error', '内容不能为空!');
+                return;
+            }
+            
+            // 显示处理状态
+            showStatus('blob', '正在处理blob数据并生成文件...');
+            
+            // 使用setTimeout让UI有时间更新状态
+            setTimeout(() => {
+                try {
+                    const contentText = document.getElementById('content').value;
+                    const blob = new Blob([contentText], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = currentFileName || 'edited_file.txt';
+                    
+                    // 添加临时元素并模拟点击
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // 清理
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        showStatus('success', '文件已成功保存!');
+                    }, 100);
+                    
+                } catch (err) {
+                    showStatus('error', `保存失败: ${err.message}`);
+                    console.error('保存错误:', err);
+                }
+            }, 50);
+        });
+    </script>
+</body>
+</html>

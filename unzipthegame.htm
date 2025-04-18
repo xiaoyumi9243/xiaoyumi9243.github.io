@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>泡泡爆破 - 解压小游戏</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+            font-family: 'Arial', sans-serif;
+            user-select: none;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            cursor: pointer;
+        }
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0.1));
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1), 0 3px 5px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(0,0,0,0.3);
+            font-weight: bold;
+        }
+        
+        .bubble:hover {
+            transform: scale(1.05);
+        }
+        
+        .bubble:active {
+            transform: scale(0.95);
+        }
+        
+        .bubble.popped {
+            animation: pop 0.3s forwards;
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        
+        #score-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255,255,255,0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 18px;
+        }
+        
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: #4dd0e1;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: #26c6da;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #title {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00796b;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    <div id="title">泡泡爆破 💥</div>
+    <div id="score-display">爆破泡泡: <span id="score">0</span></div>
+    <div id="controls">
+        <button id="add-bubbles">添加泡泡</button>
+        <button id="clear-bubbles">清除所有</button>
+    </div>
+
+    <script>
+        const container = document.getElementById('game-container');
+        const scoreDisplay = document.getElementById('score');
+        const addBubblesBtn = document.getElementById('add-bubbles');
+        const clearBubblesBtn = document.getElementById('clear-bubbles');
+        
+        let score = 0;
+        let bubbleCount = 0;
+        const maxBubbles = 50;
+        const colors = [
+            '#FF5252', '#FF4081', '#E040FB', '#7C4DFF', 
+            '#536DFE', '#448AFF', '#40C4FF', '#18FFFF', 
+            '#64FFDA', '#69F0AE', '#B2FF59', '#EEFF41', 
+            '#FFFF00', '#FFD740', '#FFAB40', '#FF6E40'
+        ];
+        
+        // 创建泡泡
+        function createBubble(x, y) {
+            if (bubbleCount >= maxBubbles) return;
+            
+            const size = Math.random() * 60 + 30;
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${x - size/2}px`;
+            bubble.style.top = `${y - size/2}px`;
+            bubble.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // 添加爆破效果
+            bubble.addEventListener('click', function() {
+                if (bubble.classList.contains('popped')) return;
+                
+                bubble.classList.add('popped');
+                score++;
+                scoreDisplay.textContent = score;
+                bubbleCount--;
+                
+                // 播放音效
+                playPopSound();
+                
+                // 移除泡泡
+                setTimeout(() => {
+                    bubble.remove();
+                }, 300);
+            });
+            
+            container.appendChild(bubble);
+            bubbleCount++;
+            return bubble;
+        }
+        
+     // 播放爆破音效
+        function playPopSound() {
+            const sounds = [
+                'https://xiaoyumi9243.github.io/music.ogg',
+                'https://xiaoyumi9243.github.io/music1.ogg',
+                'https://xiaoyumi9243.github.io/music2.ogg'
+            ];
+            
+            const sound = new Audio(sounds[Math.floor(Math.random() * sounds.length)]);
+            sound.volume = 0.3;
+            sound.play().catch(e => console.log('无法播放音效:', e));
+        }
+        
+        // 随机添加泡泡
+        function addRandomBubbles(count) {
+            for (let i = 0; i < count; i++) {
+                if (bubbleCount >= maxBubbles) break;
+                
+                const x = Math.random() * (window.innerWidth - 100) + 50;
+                const y = Math.random() * (window.innerHeight - 100) + 50;
+                createBubble(x, y);
+            }
+        }
+        
+        // 清除所有泡泡
+        function clearAllBubbles() {
+            document.querySelectorAll('.bubble').forEach(bubble => {
+                bubble.classList.add('popped');
+                setTimeout(() => bubble.remove(), 300);
+            });
+            bubbleCount = 0;
+        }
+        
+        // 点击空白处添加泡泡
+        container.addEventListener('click', function(e) {
+            if (e.target === container) {
+                createBubble(e.clientX, e.clientY);
+            }
+        });
+        
+        // 按钮事件
+        addBubblesBtn.addEventListener('click', function() {
+            addRandomBubbles(10);
+        });
+        
+        clearBubblesBtn.addEventListener('click', clearAllBubbles);
+        
+        // 初始泡泡
+        addRandomBubbles(15);
+        
+        // 响应窗口大小变化
+        window.addEventListener('resize', function() {
+            // 可以添加重新定位泡泡的逻辑
+        });
+    </script>
+</body>
+</html>
