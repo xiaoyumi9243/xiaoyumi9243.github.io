@@ -1,0 +1,14 @@
+user1{
+user_name:admin
+password:admin123
+}
+
+user2{
+user_name:john
+password:john1234
+}
+
+user3{
+user_name:lisa
+password:lisa5678
+}
