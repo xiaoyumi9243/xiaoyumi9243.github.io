@@ -896,22 +896,36 @@ closeAnnouncement.addEventListener('click', closeModal);
 announcementModal.addEventListener('click', function(e) {
     if (e.target === announcementModal) closeModal();
 });
-// 修改checkLoginStatus函数
+<script>
+// 获取Cookie值的辅助函数
+function getCookie(name) {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [cookieName, cookieValue] = cookie.trim().split('=');
+        if (cookieName === name) {
+            return decodeURIComponent(cookieValue);
+        }
+    }
+    return null;
+}
+
+// 检查登录状态并更新UI
 function checkLoginStatus() {
-    console.log('当前Cookie:', document.cookie); // 调试输出
-    
     const username = getCookie('username');
     const isLoggedIn = getCookie('isLoggedIn') === 'true';
     const loginMenuItem = document.getElementById('loginMenuItem');
     
+    // 确保找到了登录菜单项
     if (!loginMenuItem) {
         console.error('未找到登录菜单项');
         return;
     }
     
+    // 检查是否已登录
     if (isLoggedIn && username) {
         console.log('用户已登录:', username);
-        // 更改"登录"为"个人信息"
+        
+        // 更改"登录"为用户名
         loginMenuItem.textContent = username;
         loginMenuItem.href = 'https://xiaoyumi9243.github.io/profile.htm';
         
@@ -919,7 +933,7 @@ function checkLoginStatus() {
         if (!document.getElementById('logoutLink')) {
             // 添加退出选项
             const logoutItem = document.createElement('li');
-            logoutItem.innerHTML = '<a href="#" id="logoutLink">退出</a>';
+            logoutItem.innerHTML = '<a href="#" id="logoutLink" style="color: #ff6b6b !important;">退出</a>';
             loginMenuItem.parentNode.parentNode.appendChild(logoutItem);
             
             // 添加退出功能
@@ -928,7 +942,8 @@ function checkLoginStatus() {
                 // 清除Cookie
                 document.cookie = 'username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
                 document.cookie = 'isLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-                location.reload();
+                // 重定向到首页
+                window.location.href = 'https://xiaoyumi9243.github.io/';
             });
         }
     } else {
@@ -944,6 +959,10 @@ function checkLoginStatus() {
         }
     }
 }
+
+// 页面加载时检查登录状态
+window.addEventListener('DOMContentLoaded', checkLoginStatus);
+</script>
 </script>
 </body>
 </html>
