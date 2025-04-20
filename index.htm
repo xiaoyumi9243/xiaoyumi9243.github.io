@@ -896,25 +896,28 @@ closeAnnouncement.addEventListener('click', closeModal);
 announcementModal.addEventListener('click', function(e) {
     if (e.target === announcementModal) closeModal();
 });
-// 获取Cookie的函数
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
-}
-
-// 检查登录状态并更新菜单
+// 修改checkLoginStatus函数
 function checkLoginStatus() {
+    console.log('当前Cookie:', document.cookie); // 调试输出
+    
     const username = getCookie('username');
+    const isLoggedIn = getCookie('isLoggedIn') === 'true';
     const loginMenuItem = document.getElementById('loginMenuItem');
     
-    if (username && loginMenuItem) {
+    if (!loginMenuItem) {
+        console.error('未找到登录菜单项');
+        return;
+    }
+    
+    if (isLoggedIn && username) {
+        console.log('用户已登录:', username);
         // 更改"登录"为"个人信息"
         loginMenuItem.textContent = username;
         loginMenuItem.href = 'https://xiaoyumi9243.github.io/profile.htm';
         
-        // 添加退出选项（如果不存在）
+        // 检查是否已存在退出按钮，避免重复添加
         if (!document.getElementById('logoutLink')) {
+            // 添加退出选项
             const logoutItem = document.createElement('li');
             logoutItem.innerHTML = '<a href="#" id="logoutLink">退出</a>';
             loginMenuItem.parentNode.parentNode.appendChild(logoutItem);
@@ -928,11 +931,19 @@ function checkLoginStatus() {
                 location.reload();
             });
         }
+    } else {
+        console.log('用户未登录或Cookie无效');
+        // 确保登录菜单项是默认状态
+        loginMenuItem.textContent = '登录';
+        loginMenuItem.href = 'https://xiaoyumi9243.github.io/login.htm';
+        
+        // 移除退出按钮如果存在
+        const logoutLink = document.getElementById('logoutLink');
+        if (logoutLink) {
+            logoutLink.parentNode.remove();
+        }
     }
 }
-
-// 页面加载时检查登录状态
-window.addEventListener('DOMContentLoaded', checkLoginStatus);
 </script>
 </body>
 </html>
