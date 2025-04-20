@@ -160,6 +160,9 @@
         
         // 页面加载时自动加载用户数据
         window.addEventListener('DOMContentLoaded', loadUserData);
+        // 在login.htm的登录验证成功后添加
+document.cookie = `username=${encodeURIComponent(username)}; path=/`;
+document.cookie = `isLoggedIn=true; path=/`;
     </script>
 </body>
 </html>

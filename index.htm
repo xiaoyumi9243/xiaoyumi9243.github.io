@@ -367,8 +367,8 @@
             <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
             <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
             <li><a href="https://xiaoyumi9243.github.io/games.htm">游戏</a></li>
-            <li><a href="https://xiaoyumi9243.github.io/login.htm">登录</a></li>
-            <li><a href="https://xiaoyumi9243.github.io/music.htm">音乐</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/login.htm" id="loginMenuItem">登录</a></li>
+           <li><a href="https://xiaoyumi9243.github.io/music.htm">音乐</a></li>
         </ul>
     </div>
 </nav>
@@ -733,6 +733,29 @@ footer {
     background-color: #8ae63e;
     transform: translateY(-2px);
 }
+/* 用户菜单项样式 */
+.nav-links .user-menu {
+    display: flex;
+    align-items: center;
+}
+
+.nav-links .user-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 2px solid #72cb3b;
+}
+
+/* 退出链接样式 */
+#logoutLink {
+    color: #ff6b6b !important;
+}
+
+#logoutLink:hover {
+    color: #ff3b3b !important;
+    border-color: #ff3b3b !important;
+}
 </style>
 <style>
 /* 替换现有的.modal-open样式 */
@@ -873,6 +896,43 @@ closeAnnouncement.addEventListener('click', closeModal);
 announcementModal.addEventListener('click', function(e) {
     if (e.target === announcementModal) closeModal();
 });
+// 获取Cookie的函数
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+}
+
+// 检查登录状态并更新菜单
+function checkLoginStatus() {
+    const username = getCookie('username');
+    const loginMenuItem = document.getElementById('loginMenuItem');
+    
+    if (username && loginMenuItem) {
+        // 更改"登录"为"个人信息"
+        loginMenuItem.textContent = username;
+        loginMenuItem.href = 'https://xiaoyumi9243.github.io/profile.htm';
+        
+        // 添加退出选项（如果不存在）
+        if (!document.getElementById('logoutLink')) {
+            const logoutItem = document.createElement('li');
+            logoutItem.innerHTML = '<a href="#" id="logoutLink">退出</a>';
+            loginMenuItem.parentNode.parentNode.appendChild(logoutItem);
+            
+            // 添加退出功能
+            document.getElementById('logoutLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                // 清除Cookie
+                document.cookie = 'username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                document.cookie = 'isLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                location.reload();
+            });
+        }
+    }
+}
+
+// 页面加载时检查登录状态
+window.addEventListener('DOMContentLoaded', checkLoginStatus);
 </script>
 </body>
 </html>
