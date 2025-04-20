@@ -896,6 +896,8 @@ closeAnnouncement.addEventListener('click', closeModal);
 announcementModal.addEventListener('click', function(e) {
     if (e.target === announcementModal) closeModal();
 });
+</script>
+
 <script>
 // 获取Cookie值的辅助函数
 function getCookie(name) {
@@ -934,7 +936,7 @@ function checkLoginStatus() {
             // 添加退出选项
             const logoutItem = document.createElement('li');
             logoutItem.innerHTML = '<a href="#" id="logoutLink" style="color: #ff6b6b !important;">退出</a>';
-            loginMenuItem.parentNode.parentNode.appendChild(logoutItem);
+            loginMenuItem.parentNode.appendChild(logoutItem);
             
             // 添加退出功能
             document.getElementById('logoutLink').addEventListener('click', function(e) {
@@ -962,6 +964,9 @@ function checkLoginStatus() {
 
 // 页面加载时检查登录状态
 window.addEventListener('DOMContentLoaded', checkLoginStatus);
+
+// 添加一个定时检查，确保状态更新
+setInterval(checkLoginStatus, 1000);
 </script>
 </script>
 </body>
