@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>网络测速工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .speed-test-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .test-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .test-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .test-button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .result-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .result-title {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .result-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .result-unit {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-left: 5px;
+        }
+        
+        .progress-container {
+            height: 6px;
+            background-color: #ecf0f1;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #2ecc71;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .ping-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .ping-good {
+            background-color: #2ecc71;
+        }
+        
+        .ping-medium {
+            background-color: #f39c12;
+        }
+        
+        .ping-bad {
+            background-color: #e74c3c;
+        }
+        
+        .server-info {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>网络测速工具</h1>
+        <p>测试您的下载速度、上传速度和延迟</p>
+    </header>
+    
+    <div class="speed-test-container">
+        <button id="start-test" class="test-button">开始测速</button>
+        <div class="results">
+            <div class="result-card">
+                <div class="result-title">
+                    <span>延迟 (Ping)</span>
+                    <span id="ping-status"></span>
+                </div>
+                <div>
+                    <span id="ping-value" class="result-value">--</span>
+                    <span class="result-unit">ms</span>
+                </div>
+                <div class="progress-container">
+                    <div id="ping-progress" class="progress-bar"></div>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <div class="result-title">下载速度</div>
+                <div>
+                    <span id="download-value" class="result-value">--</span>
+                    <span class="result-unit">Mbps</span>
+                </div>
+                <div class="progress-container">
+                    <div id="download-progress" class="progress-bar"></div>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <div class="result-title">上传速度</div>
+                <div>
+                    <span id="upload-value" class="result-value">--</span>
+                    <span class="result-unit">Mbps</span>
+                </div>
+                <div class="progress-container">
+                    <div id="upload-progress" class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="server-info">
+            测试服务器: <span id="server-location">正在检测...</span>
+        </div>
+    </div>
+    
+    <footer>
+        <p>注意: 测速结果可能受设备性能、网络状况和服务器位置影响</p>
+    </footer>
+
+    <script>
+        // DOM元素
+        const startTestBtn = document.getElementById('start-test');
+        const pingValueEl = document.getElementById('ping-value');
+        const pingStatusEl = document.getElementById('ping-status');
+        const downloadValueEl = document.getElementById('download-value');
+        const uploadValueEl = document.getElementById('upload-value');
+        const serverLocationEl = document.getElementById('server-location');
+        const pingProgressEl = document.getElementById('ping-progress');
+        const downloadProgressEl = document.getElementById('download-progress');
+        const uploadProgressEl = document.getElementById('upload-progress');
+        
+        // 测试状态
+        let isTesting = false;
+        let testStartTime;
+        let testServer = {
+            url: 'https://httpbin.org/ip',
+            location: '未知'
+        };
+        
+        // 初始化 - 获取服务器信息
+        async function init() {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                testServer.location = `${data.city}, ${data.country_name}`;
+                serverLocationEl.textContent = testServer.location;
+            } catch (err) {
+                console.error('获取服务器信息失败:', err);
+                serverLocationEl.textContent = '未知位置';
+            }
+        }
+        
+        // 测试Ping延迟
+        async function testPing() {
+            pingValueEl.textContent = '...';
+            pingStatusEl.innerHTML = '<div class="loading"></div>';
+            
+            const startTime = performance.now();
+            try {
+                const response = await fetch(testServer.url, {
+                    method: 'HEAD',
+                    cache: 'no-store',
+                    mode: 'no-cors'
+                });
+                const endTime = performance.now();
+                const ping = Math.round(endTime - startTime);
+                
+                pingValueEl.textContent = ping;
+                pingProgressEl.style.width = '100%';
+                
+                // 设置Ping状态指示器
+                let pingClass, pingText;
+                if (ping < 100) {
+                    pingClass = 'ping-good';
+                    pingText = '优秀';
+                } else if (ping < 300) {
+                    pingClass = 'ping-medium';
+                    pingText = '一般';
+                } else {
+                    pingClass = 'ping-bad';
+                    pingText = '较差';
+                }
+                
+                pingStatusEl.innerHTML = `<span class="ping-indicator ${pingClass}"></span>${pingText}`;
+                
+                return ping;
+            } catch (err) {
+                console.error('Ping测试失败:', err);
+                pingValueEl.textContent = '错误';
+                pingStatusEl.textContent = '测试失败';
+                return null;
+            }
+        }
+        
+        // 测试下载速度
+        async function testDownload() {
+            downloadValueEl.textContent = '...';
+            downloadProgressEl.style.width = '0%';
+            
+            const testDataUrl = `https://httpbin.org/bytes/${Math.floor(Math.random() * 1000000) + 1000000}?seed=${Date.now()}`;
+            const startTime = performance.now();
+            let bytesReceived = 0;try {
+                const response = await fetch(testDataUrl);
+                const reader = response.body.getReader();
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    bytesReceived += value.length;
+                    const elapsedTime = (performance.now() - startTime) / 1000; // 转换为秒
+                    const speedMbps = (bytesReceived * 8 / (1000 * 1000)) / elapsedTime;
+                    
+                    // 更新UI
+                    downloadValueEl.textContent = speedMbps.toFixed(2);
+                    downloadProgressEl.style.width = `${Math.min(100, (elapsedTime / 5) * 100)}%`;
+                    
+                    // 测试持续时间达到5秒或收到足够数据后停止
+                    if (elapsedTime > 5 || bytesReceived > 10 * 1000 * 1000) {
+                        break;
+                    }
+                }
+                
+                const endTime = performance.now();
+                const duration = (endTime - startTime) / 1000; // 秒
+                const speedMbps = (bytesReceived * 8 / (1000 * 1000)) / duration;
+                
+                downloadValueEl.textContent = speedMbps.toFixed(2);
+                downloadProgressEl.style.width = '100%';
+                
+                return speedMbps;
+            } catch (err) {
+                console.error('下载测试失败:', err);
+                downloadValueEl.textContent = '错误';
+                return null;
+            }
+        }
+        
+        // 测试上传速度
+        async function testUpload() {
+            uploadValueEl.textContent = '...';
+            uploadProgressEl.style.width = '0%';
+            
+            const testDataSize = 2 * 1024 * 1024; // 2MB测试数据
+            const testData = new Uint8Array(testDataSize);
+            for (let i = 0; i < testData.length; i++) {
+                testData[i] = Math.floor(Math.random() * 256);
+            }
+            
+            const blob = new Blob([testData]);
+            const formData = new FormData();
+            formData.append('file', blob, 'speedtest.bin');
+            
+            const startTime = performance.now();
+            
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'https://httpbin.org/post', true);
+                
+                // 进度事件
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const elapsedTime = (performance.now() - startTime) / 1000;
+                        const speedMbps = (event.loaded * 8 / (1000 * 1000)) / elapsedTime;
+                        
+                        uploadValueEl.textContent = speedMbps.toFixed(2);
+                        uploadProgressEl.style.width = `${Math.min(100, (event.loaded / event.total) * 100)}%`;
+                    }
+                };
+                
+                xhr.onload = () => {
+                    const endTime = performance.now();
+                    const duration = (endTime - startTime) / 1000;
+                    const speedMbps = (testDataSize * 8 / (1000 * 1000)) / duration;
+                    
+                    uploadValueEl.textContent = speedMbps.toFixed(2);
+                    uploadProgressEl.style.width = '100%';
+                };
+                
+                xhr.send(formData);
+                
+                // 等待上传完成或超时
+                await new Promise((resolve) => {
+                    xhr.onload = xhr.onerror = resolve;
+                    setTimeout(resolve, 10000); // 10秒超时
+                });
+                
+                return parseFloat(uploadValueEl.textContent);
+            } catch (err) {
+                console.error('上传测试失败:', err);
+                uploadValueEl.textContent = '错误';
+                return null;
+            }
+        }
+        
+        // 执行完整测速
+        async function runSpeedTest() {
+            if (isTesting) return;
+            isTesting = true;
+            startTestBtn.disabled = true;
+            startTestBtn.textContent = '测试中...';
+            
+            try {
+                // 重置UI
+                pingValueEl.textContent = '...';
+                downloadValueEl.textContent = '...';
+                uploadValueEl.textContent = '...';
+                pingProgressEl.style.width = '0%';
+                downloadProgressEl.style.width = '0%';
+                uploadProgressEl.style.width = '0%';
+                pingStatusEl.textContent = '';
+                
+                // 执行测试
+                testStartTime = performance.now();
+                
+                await testPing();
+                await testDownload();
+                await testUpload();
+                
+                const totalTime = ((performance.now() - testStartTime) / 1000).toFixed(1);
+                console.log(`测速完成，总耗时: ${totalTime}秒`);
+            } catch (err) {
+                console.error('测速过程中出错:', err);
+            } finally {
+                isTesting = false;
+                startTestBtn.disabled = false;
+                startTestBtn.textContent = '重新测速';
+            }
+        }
+        
+        // 事件监听
+        startTestBtn.addEventListener('click', runSpeedTest);
+        
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

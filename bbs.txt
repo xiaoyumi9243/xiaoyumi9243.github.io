@@ -1,0 +1,11 @@
+{name:[张三]
+little:[今日推荐]
+text:[推荐一本好书：《Web开发实战》]
+photo:[Done]
+}
+
+{name:[技术小助手]
+little:[编程技巧]
+text:[使用CSS Grid进行布局...]
+photo:[https://example.com/grid-example.jpg]
+}
