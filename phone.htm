@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手机手电筒控制</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        #torch-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        #torch-btn.on {
+            background-color: #f44336;
+            box-shadow: 0 0 20px #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <button id="torch-btn">打开手电筒</button>
+
+    <script>
+        const torchBtn = document.getElementById('torch-btn');
+        let track = null;
+        let torchOn = false;
+        let stream = null; // 新增：保持stream引用
+
+        async function toggleTorch() {
+            try {
+                if (!track) {
+                    // 请求摄像头权限并获取视频流
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'environment',
+                            advanced: [{ torch: true }] // 明确要求手电筒支持
+                        }
+                    });
+                    track = stream.getVideoTracks()[0];
+                    
+                    // 检查是否支持手电筒
+                    if (!track.getCapabilities().torch) {
+                        alert('您的设备不支持手电筒功能');
+                        return;
+                    }
+                }
+
+                // 切换手电筒状态
+                torchOn = !torchOn;
+                await track.applyConstraints({
+                    advanced: [{ torch: torchOn }]
+                });
+
+                // 更新按钮状态
+                torchBtn.textContent = torchOn ? '关闭手电筒' : '打开手电筒';
+                torchBtn.classList.toggle('on', torchOn);
+
+                // 新增：防止浏览器自动释放资源
+                if (torchOn) {
+                    track.onended = () => {
+                        if (torchOn) toggleTorch(); // 如果被意外关闭，重新打开
+                    };
+                }
+
+            } catch (err) {
+                console.error("手电筒控制失败:", err);
+                alert(`错误: ${err.message}\n请使用Chrome浏览器并授予摄像头权限`);
+            }
+        }
+
+        // 页面关闭时自动关闭手电筒
+        window.addEventListener('beforeunload', () => {
+            if (track && torchOn) {
+                track.applyConstraints({ advanced: [{ torch: false }] });
+            }
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        torchBtn.addEventListener('click', toggleTorch);
+    </script>
+</body>
+</html>

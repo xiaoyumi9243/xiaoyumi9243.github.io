@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>录音</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #stopBtn {
+            background-color: #f44336;
+        }
+        #playBtn {
+            background-color: #008CBA;
+        }
+        #downloadBtn {
+            background-color: #ff9800;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .recording {
+            background-color: #ffebee;
+            color: #f44336;
+        }
+        .visualizer {
+            margin: 20px auto;
+            width: 100%;
+            height: 100px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>网页录音软件</h1>
+    
+    <div class="controls">
+        <button id="startBtn">开始录音</button>
+        <button id="stopBtn" disabled>停止录音</button>
+        <button id="playBtn" disabled>播放录音</button>
+        <button id="downloadBtn" disabled>下载录音</button>
+    </div>
+    
+    <div id="status" class="status"></div>
+    
+    <div class="visualizer">
+        <canvas id="visualizer" width="600" height="100"></canvas>
+    </div>
+    
+    <script>
+        // 获取DOM元素
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const playBtn = document.getElementById('playBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusDiv = document.getElementById('status');
+        const canvas = document.getElementById('visualizer');
+        const canvasCtx = canvas.getContext('2d');
+        
+        // 录音相关变量
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob;
+        let audioUrl;
+        let audio = new Audio();
+        let animationId;
+        let audioContext;
+        let analyser;
+        let dataArray;
+        
+        // 开始录音
+        startBtn.addEventListener('click', async () => {
+            try {
+                statusDiv.textContent = "正在请求麦克风权限...";
+                statusDiv.className = "status";
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // 设置音频分析器
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                // 初始化录音器
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    audioUrl = URL.createObjectURL(audioBlob);
+                    audio.src = audioUrl;
+                    
+                    playBtn.disabled = false;
+                    downloadBtn.disabled = false;
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    
+                    statusDiv.textContent = "录音完成! 点击播放或下载";
+                    statusDiv.className = "status";
+                    
+                    cancelAnimationFrame(animationId);
+                    drawBlankVisualizer();
+                };
+                
+                mediaRecorder.start();
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                statusDiv.textContent = "正在录音...";
+                statusDiv.className = "status recording";
+                
+                // 开始可视化
+                drawVisualizer();
+                
+            } catch (error) {
+                console.error("录音错误:", error);
+                statusDiv.textContent = `错误: ${error.message}`;
+                statusDiv.className = "status";
+            }
+        });
+        
+        // 停止录音
+        stopBtn.addEventListener('click', () => {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        });
+        
+        // 播放录音
+        playBtn.addEventListener('click', () => {
+            audio.play();
+            statusDiv.textContent = "正在播放录音...";
+            statusDiv.className = "status recording";
+            
+            audio.onended = () => {
+                statusDiv.textContent = "播放完成";
+                statusDiv.className = "status";
+            };
+        });
+        
+        // 下载录音
+        downloadBtn.addEventListener('click', () => {
+            const a = document.createElement('a');
+            a.href = audioUrl;
+            a.download = `录音-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.wav`;
+            a.click();
+        });
+        
+        // 绘制音频可视化
+        function drawVisualizer() {
+            animationId = requestAnimationFrame(drawVisualizer);
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const barWidth = (canvas.width / analyser.frequencyBinCount) * 2.5;
+            let x = 0;
+            
+            for (let i = 0; i < analyser.frequencyBinCount; i++) {
+                const barHeight = dataArray[i] / 2;
+                
+                canvasCtx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+                canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                
+                x += barWidth + 1;
+            }
+        }
+        
+        // 绘制空白可视化
+        function drawBlankVisualizer() {
+            canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // 初始化空白可视化
+        drawBlankVisualizer();
+    </script>
+</body>
+</html>

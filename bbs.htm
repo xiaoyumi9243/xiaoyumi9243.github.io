@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub 论坛浏览器</title>
+    <title>xiaoyumi论坛</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -127,11 +127,335 @@
             box-shadow: 0 5px 15px rgba(52,152,219,0.3);
         }
     </style>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Minecraft', Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            background-image: url('https://www.minecraft.net/content/dam/minecraft/touchup-2020/minecraft-background-behavior-1800x1012.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        
+        /* 像素风格导航栏 - 添加云母效果 */
+        .navbar {
+            background-color: rgba(59, 59, 59, 0.8); /* 半透明背景 */
+            border-bottom: 4px solid #6a6a6a;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            
+            /* 云母效果关键属性 */
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            
+            /* 边框效果增强 */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            
+            /* 动画过渡 */
+            transition: all 0.3s ease;
+        }
+        
+        /* 滚动时导航栏效果 */
+        .navbar.scrolled {
+            background-color: rgba(40, 40, 40, 0.9);
+            border-bottom-width: 3px;
+            padding: 10px 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            color: #72cb3b;
+            text-shadow: 2px 2px 0 #4d7a29;
+            transition: all 0.3s;
+        }
+        
+        .navbar.scrolled .logo {
+            font-size: 22px;
+        }
+        
+        /* 菜单按钮样式 */
+        .menu-button {
+            background-color: rgba(114, 203, 59, 0.9);
+            border: 3px solid #4d7a29;
+            color: white;
+            font-family: 'Minecraft', sans-serif;
+            padding: 8px 15px;
+            text-transform: uppercase;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .menu-button:hover {
+            background-color: rgba(138, 230, 62, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        /* 导航链接容器 - 初始隐藏 */
+        .nav-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background-color: rgba(59, 59, 59, 0.9);
+            border: 4px solid #6a6a6a;
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+            width: 200px;
+            
+            /* 云母效果 */
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            
+            /* 动画效果 */
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        /* 显示导航链接的类 */
+        .nav-container.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+     /* 导航链接容器 - 确保垂直布局 */
+.nav-container {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background-color: rgba(59, 59, 59, 0.9);
+    border: 4px solid #6a6a6a;
+    padding: 15px;
+    display: none;
+    flex-direction: column; /* 强制垂直排列 */
+    z-index: 999;
+    width: 200px;
+    max-height: 80vh; /* 限制最大高度 */
+    overflow-y: auto; /* 支持滚动 */
+}
+/* 弹窗内容文字颜色 */
+.modal-content {
+    color: #ffffff; /* 添加这行，设置弹窗内文字为白色 */
+    background-color: #3b3b3b;
+    border: 4px solid #6a6a6a;
+    padding: 25px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    background-color: rgba(59, 59, 59, 0.85);
+}
+
+
+/* 导航链接列表 */
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex; /* 新增 */
+    flex-direction: column; /* 垂直排列 */
+}
+
+/* 每个菜单项 */
+.nav-links li {
+    width: 100%;
+    margin: 5px 0; /* 调整间距 */
+}
+
+/* 链接样式 */
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 12px 16px;
+    display: block;
+    width: 100%;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex; /* 新增 */
+    flex-direction: column; /* 垂直排列 */
+}
+
+/* 每个菜单项 */
+.nav-links li {
+    width: 100%;
+    margin: 5px 0; /* 调整间距 */
+}
+
+/* 链接样式 */
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 12px 16px;
+    display: block;
+    width: 100%;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.nav-links a:hover {
+    border: 2px solid #72cb3b;
+    background-color: rgba(77, 122, 41, 0.7);
+    transform: translateX(8px);
+}
+        
+      
+        /* 像素风格按钮 */
+        .pixel-button {
+            background-color: #72cb3b;
+            border: 3px solid #4d7a29;
+            color: white;
+            font-family: 'Minecraft', sans-serif;
+            padding: 12px 25px;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pixel-button:hover {
+            background-color: #8ae63e;
+            transform: translateY(-2px);
+        }
+        
+        /* 内容区块 */
+        .content-section {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(27, 27, 27, 0.9);
+            border: 4px solid #6a6a6a;
+            margin-top: 20px;
+        }
+        .section-title {
+            color: #72cb3b;
+            border-bottom: 3px solid #4d7a29;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+        
+        /* 页脚 */
+        footer {
+            background-color: #1a1a1a;
+            padding: 20px;
+            text-align: center;
+            border-top: 4px solid #6a6a6a;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1; /* 确保页脚在弹窗下方 */
+        }
+        
+        .social-links {
+            margin: 15px 0;
+        }
+        
+        .social-links a {
+            margin: 0 10px;
+            color: #72cb3b;
+            text-decoration: none;
+        }
+        /* 修改导航栏高度和容器边距 */
+.navbar {
+    height: 60px; /* 明确设置导航栏高度 */
+    padding: 10px 20px; /* 调整内边距 */
+    /* 其他原有样式保持不变 */
+}
+
+.container {
+    margin-top: 80px; /* 增加顶部边距 */
+    position: relative; /* 添加相对定位 */
+    z-index: 100; /* 确保内容在导航栏下方 */
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* 添加媒体查询适配移动端 */
+@media (max-width: 768px) {
+    .navbar {
+        height: 50px;
+        padding: 8px 15px;
+    }
+    
+    .container {
+        margin-top: 70px;
+        padding: 20px;
+    }
+    
+    .logo {
+        font-size: 20px;
+    }
+    
+    .menu-button {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+/* 添加滚动时动态调整 */
+window.addEventListener('scroll', () => {
+    const navbar = document.querySelector('.navbar');
+    const container = document.querySelector('.container');
+    
+    if (window.scrollY > 50) {
+        navbar.style.height = '50px';
+        container.style.marginTop = '70px';
+    } else {
+        navbar.style.height = '60px';
+        container.style.marginTop = '80px';
+    }
+});
+       
+        
+    </style>
+   
 </head>
 <body>
+    <!-- 导航栏 -->
+<nav class="navbar">
+    <div class="logo">xiaoyumi</div>
+    <button class="menu-button" id="menuToggle">菜单</button>
+    <div class="nav-container" id="navContainer">
+        <ul class="nav-links">
+            <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
+            <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/games.htm">游戏</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/login.htm">登录</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/music.htm">音乐</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/bbs.htm">论坛(new)</a></li><li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
+            <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/games.htm">游戏</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/login.htm" id="loginMenuItem">登录</a></li>
+           <li><a href="https://xiaoyumi9243.github.io/music.htm">音乐</a></li>
+           <li><a href="https://xiaoyumi9243.github.io/bbs.htm">论坛</a></li>
+        </ul>
+    </div>
+</nav>
     <div class="container">
         <h1 style="text-align: center; color: var(--primary-color); margin-bottom: 30px;">
-            📚 GitHub 论坛浏览器
+            📚xiaoyumi论坛
         </h1>
         
         <button class="refresh-btn" onclick="loadData()">
@@ -146,11 +470,19 @@
         
         <div id="posts-container"></div>
     </div>
+    <footer>
+    <!-- 原有内容保持不变 -->
+    <div class="social-links">
+<a href="https://xiaoyumi9243.github.io/bug.htm">Bug反馈</a>
+    </div>
+    <p>此网站为xiaoyumi私人网站</p>
+    <p>此网站仅为演示用途</p>
+</footer>
 
     <script>
         // 配置信息（修改为您的GitHub信息）
         const CONFIG = {
-            repoUrl: 'https://xiaoyumi9243.github.io/你的仓库名/bbs.txt',
+            repoUrl: 'https://xiaoyumi9243.github.io/bbs.txt',
             cacheBust: true
         };
 
@@ -255,5 +587,118 @@
         // 初始加载
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
+    <script>
+        // 菜单切换功能
+        const menuToggle = document.getElementById('menuToggle');
+        const navContainer = document.getElementById('navContainer');
+        
+        menuToggle.addEventListener('click', function() {
+            navContainer.classList.toggle('show');
+            
+            // 更改按钮文本
+            if (navContainer.classList.contains('show')) {
+                menuToggle.textContent = '关闭';
+            } else {
+                menuToggle.textContent = '菜单';
+            }
+        });
+        
+        // 点击页面其他区域关闭菜单
+        document.addEventListener('click', function(event) {
+            if (!navContainer.contains(event.target) && event.target !== menuToggle) {
+                navContainer.classList.remove('show');
+                menuToggle.textContent = '菜单';
+            }
+        });
+        
+        // 弹窗控制代码
+        const showModalBtn = document.getElementById('showModalBtn');
+        const announcementModal = document.getElementById('announcementModal');
+        const closeAnnouncement = document.getElementById('closeAnnouncement');
+        
+        showModalBtn.addEventListener('click', function() {
+            announcementModal.style.display = 'flex';
+        });
+        
+        closeAnnouncement.addEventListener('click', function() {
+            announcementModal.style.display = 'none';
+        });
+        
+        announcementModal.addEventListener('click', function(e) {
+            if (e.target === announcementModal) {
+                announcementModal.style.display = 'none';
+            }
+        });
+    </script>
+    <script>
+// 获取Cookie值的辅助函数
+function getCookie(name) {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [cookieName, cookieValue] = cookie.trim().split('=');
+        if (cookieName === name) {
+            return decodeURIComponent(cookieValue);
+        }
+    }
+    return null;
+}
+
+// 检查登录状态并更新UI
+function checkLoginStatus() {
+    const username = getCookie('username');
+    const isLoggedIn = getCookie('isLoggedIn') === 'true';
+    const loginMenuItem = document.getElementById('loginMenuItem');
+    
+    // 确保找到了登录菜单项
+    if (!loginMenuItem) {
+        console.error('未找到登录菜单项');
+        return;
+    }
+    
+    // 检查是否已登录
+    if (isLoggedIn && username) {
+        console.log('用户已登录:', username);
+        
+        // 更改"登录"为用户名
+        loginMenuItem.textContent = username;
+        loginMenuItem.href = 'https://xiaoyumi9243.github.io/profile.htm';
+        
+        // 检查是否已存在退出按钮，避免重复添加
+        if (!document.getElementById('logoutLink')) {
+            // 添加退出选项
+            const logoutItem = document.createElement('li');
+            logoutItem.innerHTML = '<a href="#" id="logoutLink" style="color: #ff6b6b !important;">退出</a>';
+            loginMenuItem.parentNode.appendChild(logoutItem);
+            
+            // 添加退出功能
+            document.getElementById('logoutLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                // 清除Cookie
+                document.cookie = 'username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                document.cookie = 'isLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                // 重定向到首页
+                window.location.href = 'https://xiaoyumi9243.github.io/';
+            });
+        }
+    } else {
+        console.log('用户未登录或Cookie无效');
+        // 确保登录菜单项是默认状态
+        loginMenuItem.textContent = '登录';
+        loginMenuItem.href = 'https://xiaoyumi9243.github.io/login.htm';
+        
+        // 移除退出按钮如果存在
+        const logoutLink = document.getElementById('logoutLink');
+        if (logoutLink) {
+            logoutLink.parentNode.remove();
+        }
+    }
+}
+
+// 页面加载时检查登录状态
+window.addEventListener('DOMContentLoaded', checkLoginStatus);
+
+// 添加一个定时检查，确保状态更新
+setInterval(checkLoginStatus, 1000);
+</script>
 </body>
 </html>

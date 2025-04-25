@@ -335,10 +335,12 @@
     <button class="menu-button" id="menuToggle">菜单</button>
     <div class="nav-container" id="navContainer">
         <ul class="nav-links">
-            <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
+<li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
             <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
             <li><a href="https://xiaoyumi9243.github.io/games.htm">游戏</a></li>
-            <li><a href="https://xiaoyumi9243.github.io/login.htm">登录</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/login.htm" id="loginMenuItem">登录</a></li>
+           <li><a href="https://xiaoyumi9243.github.io/music.htm">音乐</a></li>
+           <li><a href="https://xiaoyumi9243.github.io/bbs.htm">论坛</a></li>
         </ul>
     </div>
 </nav>
@@ -544,6 +546,76 @@ themeToggle.addEventListener('click', () => {
     // 设置按钮初始文本
     themeToggle.textContent = savedTheme === 'dark' ? '🌓 夜间模式' : '🌞 白天模式';
 })();
+</script>
+<script>
+// 获取Cookie值的辅助函数
+function getCookie(name) {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [cookieName, cookieValue] = cookie.trim().split('=');
+        if (cookieName === name) {
+            return decodeURIComponent(cookieValue);
+        }
+    }
+    return null;
+}
+
+// 检查登录状态并更新UI
+function checkLoginStatus() {
+    const username = getCookie('username');
+    const isLoggedIn = getCookie('isLoggedIn') === 'true';
+    const loginMenuItem = document.getElementById('loginMenuItem');
+    
+    // 确保找到了登录菜单项
+    if (!loginMenuItem) {
+        console.error('未找到登录菜单项');
+        return;
+    }
+    
+    // 检查是否已登录
+    if (isLoggedIn && username) {
+        console.log('用户已登录:', username);
+        
+        // 更改"登录"为用户名
+        loginMenuItem.textContent = username;
+        loginMenuItem.href = 'https://xiaoyumi9243.github.io/profile.htm';
+        
+        // 检查是否已存在退出按钮，避免重复添加
+        if (!document.getElementById('logoutLink')) {
+            // 添加退出选项
+            const logoutItem = document.createElement('li');
+            logoutItem.innerHTML = '<a href="#" id="logoutLink" style="color: #ff6b6b !important;">退出</a>';
+            loginMenuItem.parentNode.appendChild(logoutItem);
+            
+            // 添加退出功能
+            document.getElementById('logoutLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                // 清除Cookie
+                document.cookie = 'username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                document.cookie = 'isLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                // 重定向到首页
+                window.location.href = 'https://xiaoyumi9243.github.io/';
+            });
+        }
+    } else {
+        console.log('用户未登录或Cookie无效');
+        // 确保登录菜单项是默认状态
+        loginMenuItem.textContent = '登录';
+        loginMenuItem.href = 'https://xiaoyumi9243.github.io/login.htm';
+        
+        // 移除退出按钮如果存在
+        const logoutLink = document.getElementById('logoutLink');
+        if (logoutLink) {
+            logoutLink.parentNode.remove();
+        }
+    }
+}
+
+// 页面加载时检查登录状态
+window.addEventListener('DOMContentLoaded', checkLoginStatus);
+
+// 添加一个定时检查，确保状态更新
+setInterval(checkLoginStatus, 1000);
 </script>
 </body>
 </html>

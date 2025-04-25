@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>手机相机</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .camera-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #camera-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .capture-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: white;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+        
+        .capture-btn.recording {
+            background-color: red;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+        
+        .switch-btn {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .preview-container {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            width: 100px;
+            height: 150px;
+            border: 2px solid white;
+            border-radius: 5px;
+            overflow: hidden;
+            display: none;
+            z-index: 10;
+        }
+        
+        #preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        #save-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        #retake-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .flash-options {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .flash-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .flash-btn.active {
+            background-color: #FFC107;
+            color: black;
+        }
+        
+        .status {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            z-index: 10;
+        }
+        
+        .mode-switcher {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .mode-btn {
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+        }
+        
+        .mode-btn.active {
+            background-color: #2196F3;
+            color: white;
+        }
+  .timer {
+            position: absolute;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: red;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 10;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="status" id="status">正在启动相机...</div>
+    <div class="timer" id="timer">00:00</div>
+    
+    <div class="mode-switcher">
+        <div class="mode-btn active" id="photo-mode-btn">拍照</div>
+        <div class="mode-btn" id="video-mode-btn">录像</div>
+    </div>
+    
+    <div class="camera-container">
+        <video id="camera-view" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+        
+        <div class="preview-container" id="preview-container">
+            <img id="preview-image" src="" alt="预览">
+        </div>
+        
+        <div class="flash-options">
+            <div class="flash-btn" id="flash-auto">⚡</div>
+            <div class="flash-btn" id="flash-on">🔦</div>
+            <div class="flash-btn active" id="flash-off">🚫</div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <div class="switch-btn" id="switch-btn">🔄</div>
+        <div class="capture-btn" id="capture-btn"></div>
+        
+        <div class="action-buttons" id="action-buttons">
+            <button class="action-btn" id="save-btn">保存</button>
+            <button class="action-btn" id="retake-btn">重拍</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素
+        const cameraView = document.getElementById('camera-view');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const captureBtn = document.getElementById('capture-btn');
+        const switchBtn = document.getElementById('switch-btn');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const actionButtons = document.getElementById('action-buttons');
+        const saveBtn = document.getElementById('save-btn');
+        const retakeBtn = document.getElementById('retake-btn');
+        const statusEl = document.getElementById('status');
+        const flashAutoBtn = document.getElementById('flash-auto');
+        const flashOnBtn = document.getElementById('flash-on');
+        const flashOffBtn = document.getElementById('flash-off');
+        const photoModeBtn = document.getElementById('photo-mode-btn');
+        const videoModeBtn = document.getElementById('video-mode-btn');
+        const timerEl = document.getElementById('timer');
+        
+        // 相机状态
+        let stream = null;
+        let currentFacingMode = 'environment'; // 默认后置摄像头
+        let flashMode = 'off';
+        let photoData = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+        let recordingStartTime = 0;
+        let timerInterval = null;
+        let currentMode = 'photo'; // 'photo' 或 'video'
+        
+        // 初始化相机
+        async function initCamera() {
+            try {
+                statusEl.textContent = '正在请求相机权限...';
+                
+                // 停止之前的流
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                
+                // 获取相机流
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
+                    audio: true // 录像时需要音频
+                });
+                
+                cameraView.srcObject = stream;
+                statusEl.textContent = currentMode === 'photo' ? '相机已就绪' : '录像模式已就绪';
+                
+                // 设置闪光灯模式
+                updateFlashMode();
+                
+            } catch (err) {
+                console.error('相机初始化失败:', err);
+                statusEl.textContent = `错误: ${err.message}`;
+            }
+        }
+        
+        // 更新闪光灯模式
+        function updateFlashMode() {
+            if (!stream) return;
+            
+            const track = stream.getVideoTracks()[0];
+            if (!track || !track.getCapabilities().torch) {
+                statusEl.textContent = '当前摄像头不支持闪光灯';
+                return;
+            }
+            try {
+                switch (flashMode) {
+                    case 'auto':
+                        track.applyConstraints({
+                            advanced: [{ torch: false }]
+                        });
+                        flashAutoBtn.classList.add('active');
+                        flashOnBtn.classList.remove('active');
+                        flashOffBtn.classList.remove('active');
+                        break;
+                    case 'on':
+                        track.applyConstraints({
+                            advanced: [{ torch:  false }]
+                        });
+                        flashAutoBtn.classList.add('active');
+                        flashOnBtn.classList.remove('active');
+                        flashOffBtn.classList.remove('active');
+                        break;
+                    case 'on':
+                        track.applyConstraints({
+                            advanced: [{ torch: true }]
+                        });
+                        flashAutoBtn.classList.remove('active');
+                        flashOnBtn.classList.add('active');
+                        flashOffBtn.classList.remove('active');
+                        break;
+                    case 'off':
+                        track.applyConstraints({
+                            advanced: [{ torch: false }]
+                        });
+                        flashAutoBtn.classList.remove('active');
+                        flashOnBtn.classList.remove('active');
+                        flashOffBtn.classList.add('active');
+                        break;
+                }
+            } catch (err) {
+                console.error('闪光灯控制失败:', err);
+            }
+        }
+        
+        // 拍照
+        function capturePhoto() {
+            // 设置canvas尺寸与视频相同
+            canvas.width = cameraView.videoWidth;
+            canvas.height = cameraView.videoHeight;
+            
+            // 绘制当前视频帧到canvas
+            ctx.drawImage(cameraView, 0, 0, canvas.width, canvas.height);
+            
+            // 获取照片数据
+            photoData = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // 显示预览
+            previewImage.src = photoData;
+            previewContainer.style.display = 'block';
+            
+            // 隐藏相机视图，显示操作按钮
+            cameraView.style.display = 'none';
+            actionButtons.style.display = 'flex';
+            captureBtn.style.display = 'none';
+            
+            statusEl.textContent = '拍照完成';
+        }
+        
+        // 开始录像
+        function startRecording() {
+            recordedChunks = [];
+            
+            try {
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'video/webm;codecs=vp9'
+                });
+                
+                mediaRecorder.ondataavailable = function(event) {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = function() {
+                    const blob = new Blob(recordedChunks, {
+                        type: 'video/webm'
+                    });
+                    photoData = URL.createObjectURL(blob);
+                    
+                    // 显示预览
+                    previewImage.src = '';
+                    previewContainer.style.display = 'block';
+                    
+                    // 隐藏相机视图，显示操作按钮
+                    cameraView.style.display = 'none';
+                    actionButtons.style.display = 'flex';
+                    captureBtn.style.display = 'none';
+                    
+                    statusEl.textContent = '录像完成';
+                };
+                
+                mediaRecorder.start(100); // 每100ms收集一次数据
+                isRecording = true;
+                recordingStartTime = Date.now();
+                timerEl.style.display = 'block';
+                updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
+                
+                captureBtn.classList.add('recording');
+                statusEl.textContent = '正在录像...';
+                
+            } catch (err) {
+                console.error('录像失败:', err);
+                statusEl.textContent = `录像错误: ${err.message}`;
+            }
+        }
+        
+        // 停止录像
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                clearInterval(timerInterval);
+                timerEl.style.display = 'none';
+                captureBtn.classList.remove('recording');
+            }
+        }
+        
+        // 更新计时器
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${minutes}:${seconds}`;
+        }
+        
+        // 保存媒体
+        function saveMedia() {
+            if (!photoData) return;
+            
+            // 创建一个下载链接
+            const link = document.createElement('a');
+            link.href = photoData;
+            
+            if (currentMode === 'photo') {
+                link.download = `photo_${new Date().toISOString().replace(/[:.]/g, '-')}.jpg`;
+            } else {
+                link.download = `video_${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
+            }
+            
+            // 触发点击下载
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            statusEl.textContent = currentMode === 'photo' ? '照片已保存' : '视频已保存';
+            
+            // 返回相机视图
+            retakeMedia();
+        }
+        
+        // 重拍
+        function retakeMedia() {
+            previewContainer.style.display = 'none';
+            cameraView.style.display = 'block';
+            actionButtons.style.display = 'none';
+            captureBtn.style.display = 'block';
+            statusEl.textContent = currentMode === 'photo' ? '相机已就绪' : '录像模式已就绪';
+        }
+        
+        // 切换摄像头
+        function switchCamera() {
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            initCamera();
+        }
+        
+        // 切换模式
+        function switchMode(mode) {
+            if (mode === currentMode) return;
+            
+            // 如果正在录像，先停止
+            if (isRecording) {
+                stopRecording();
+            }
+            
+            currentMode = mode;
+            
+            // 更新UI
+            if (mode === 'photo') {
+                photoModeBtn.classList.add('active');
+                videoModeBtn.classList.remove('active');
+                captureBtn.classList.remove('recording');
+                timerEl.style.display = 'none';
+            } else {
+                photoModeBtn.classList.remove('active');
+                videoModeBtn.classList.add('active');
+            }
+            
+            // 重置预览和按钮状态
+            retakeMedia();
+            
+            // 重新初始化相机（确保有音频）
+            initCamera();
+        }
+        
+        // 事件监听
+        captureBtn.addEventListener('click', function() {
+            if (currentMode === 'photo') {
+                capturePhoto();
+            } else {
+                if (isRecording) {
+                    stopRecording();
+                } else {
+                    startRecording();
+                }
+            }
+        });
+        
+        switchBtn.addEventListener('click', switchCamera);
+        saveBtn.addEventListener('click', saveMedia);
+        retakeBtn.addEventListener('click', retakeMedia);
+        
+        photoModeBtn.addEventListener('click', () => switchMode('photo'));
+        videoModeBtn.addEventListener('click', () => switchMode('video'));
+        
+        flashAutoBtn.addEventListener('click', () => {
+            flashMode = 'auto';
+            updateFlashMode();
+        });
+        
+        flashOnBtn.addEventListener('click', () => {
+            flashMode = 'on';
+            updateFlashMode();
+        });
+        
+        flashOffBtn.addEventListener('click', () => {
+            flashMode = 'off';
+            updateFlashMode();
+        });
+        
+        // 页面加载时初始化相机
+        window.addEventListener('load', initCamera);
+        
+        // 页面关闭时停止相机
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (isRecording) {
+                stopRecording();
+            }
+        });
+    </script>
+</body>
+</html>

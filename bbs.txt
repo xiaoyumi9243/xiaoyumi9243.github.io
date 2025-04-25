@@ -1,11 +1,11 @@
-{name:[张三]
-little:[今日推荐]
-text:[推荐一本好书：《Web开发实战》]
+{name:[小玉米]
+little:[如何检查你得了高积云恐惧症]
+text:[直接看你忍不忍得了高积云的大小姐脾气,再看你是否忍不忍得了高积云的奥运精神]
 photo:[Done]
 }
 
-{name:[技术小助手]
-little:[编程技巧]
-text:[使用CSS Grid进行布局...]
-photo:[https://example.com/grid-example.jpg]
+{name:[广告小助手]
+little:[超级小广告]
+text:[仅需不到1分钱即可购买破烂风扇]
+photo:[https://img0.baidu.com/it/u=2462687196,475301385&fm=253&fmt=auto&app=138&f=JPEG?w=555&h=500]
 }
