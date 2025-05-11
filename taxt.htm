@@ -1,0 +1,11 @@
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<script>
+document.getElementById("myForm").addEventListener("submit", function(event) { 
+    var response = hcaptcha.getResponse(); 
+    if(response.length == 0) { 
+        event.preventDefault(); 
+        alert("请完成验证码验证！");
+    }
+});
+</script>
+<div class="h-captcha" data-sitekey="21a06266-b552-49c6-b6ee-b0a061d433f4"></div>
