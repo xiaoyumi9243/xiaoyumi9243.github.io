@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滑动选择视频播放器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .video-player {
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 比例 */
+            position: relative;
+            margin-bottom: 30px;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .video-player iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-list {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 10px 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .video-list::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .video-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .video-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .video-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        .video-item {
+            flex: 0 0 250px;
+            scroll-snap-align: start;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .video-item:hover {
+            transform: scale(1.03);
+        }
+        
+        .video-thumbnail {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .video-info {
+            padding: 10px;
+            background-color: #fff;
+        }
+        
+        .video-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .video-duration {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .active-video {
+            border: 3px solid #ff4d4f;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #ff4d4f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #ff7875;
+        }
+    </style><style>
+        
+        /* 像素风格导航栏 - 添加云母效果 */
+        .navbar {
+            background-color: rgba(59, 59, 59, 0.8); /* 半透明背景 */
+            border-bottom: 4px solid #6a6a6a;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            
+            /* 云母效果关键属性 */
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            
+            /* 边框效果增强 */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            
+            /* 动画过渡 */
+            transition: all 0.3s ease;
+        }
+        
+        /* 滚动时导航栏效果 */
+        .navbar.scrolled {
+            background-color: rgba(40, 40, 40, 0.9);
+            border-bottom-width: 3px;
+            padding: 10px 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            color: #72cb3b;
+            text-shadow: 2px 2px 0 #4d7a29;
+            transition: all 0.3s;
+        }
+        
+        .navbar.scrolled .logo {
+            font-size: 22px;
+        }
+        
+        /* 菜单按钮样式 */
+        .menu-button {
+            background-color: rgba(114, 203, 59, 0.9);
+            border: 3px solid #4d7a29;
+            color: white;
+            font-family: 'Minecraft', sans-serif;
+            padding: 8px 15px;
+            text-transform: uppercase;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .menu-button:hover {
+            background-color: rgba(138, 230, 62, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        /* 导航链接容器 - 初始隐藏 */
+        .nav-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background-color: rgba(59, 59, 59, 0.9);
+            border: 4px solid #6a6a6a;
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+            width: 200px;
+            
+            /* 云母效果 */
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            
+            /* 动画效果 */
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        /* 显示导航链接的类 */
+        .nav-container.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+     /* 导航链接容器 - 确保垂直布局 */
+.nav-container {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background-color: rgba(59, 59, 59, 0.9);
+    border: 4px solid #6a6a6a;
+    padding: 15px;
+    display: none;
+    flex-direction: column; /* 强制垂直排列 */
+    z-index: 999;
+    width: 200px;
+    max-height: 80vh; /* 限制最大高度 */
+    overflow-y: auto; /* 支持滚动 */
+}
+/* 弹窗内容文字颜色 */
+.modal-content {
+    color: #ffffff; /* 添加这行，设置弹窗内文字为白色 */
+    background-color: #3b3b3b;
+    border: 4px solid #6a6a6a;
+    padding: 25px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    background-color: rgba(59, 59, 59, 0.85);
+}
+
+
+/* 导航链接列表 */
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex; /* 新增 */
+    flex-direction: column; /* 垂直排列 */
+}
+
+/* 每个菜单项 */
+.nav-links li {
+    width: 100%;
+    margin: 5px 0; /* 调整间距 */
+}
+
+/* 链接样式 */
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 12px 16px;
+    display: block;
+    width: 100%;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex; /* 新增 */
+    flex-direction: column; /* 垂直排列 */
+}
+
+/* 每个菜单项 */
+.nav-links li {
+    width: 100%;
+    margin: 5px 0; /* 调整间距 */
+}
+
+/* 链接样式 */
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 12px 16px;
+    display: block;
+    width: 100%;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.nav-links a:hover {
+    border: 2px solid #72cb3b;
+    background-color: rgba(77, 122, 41, 0.7);
+    transform: translateX(8px);
+}
+        
+      
+        /* 像素风格按钮 */
+        .pixel-button {
+            background-color: #72cb3b;
+            border: 3px solid #4d7a29;
+            color: white;
+            font-family: 'Minecraft', sans-serif;
+            padding: 12px 25px;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pixel-button:hover {
+            background-color: #8ae63e;
+            transform: translateY(-2px);
+        }
+        
+        /* 内容区块 */
+        .content-section {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(27, 27, 27, 0.9);
+            border: 4px solid #6a6a6a;
+            margin-top: 20px;
+        }
+        .section-title {
+            color: #72cb3b;
+            border-bottom: 3px solid #4d7a29;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+        
+        /* 页脚 */
+        footer {
+            background-color: #1a1a1a;
+            padding: 20px;
+            text-align: center;
+            border-top: 4px solid #6a6a6a;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1; /* 确保页脚在弹窗下方 */
+        }
+        
+        .social-links {
+            margin: 15px 0;
+        }
+        
+        .social-links a {
+            margin: 0 10px;
+            color: #72cb3b;
+            text-decoration: none;
+        }
+        /* 修改导航栏高度和容器边距 */
+.navbar {
+    height: 60px; /* 明确设置导航栏高度 */
+    padding: 10px 20px; /* 调整内边距 */
+    /* 其他原有样式保持不变 */
+}
+
+.container {
+    margin-top: 80px; /* 增加顶部边距 */
+    position: relative; /* 添加相对定位 */
+    z-index: 100; /* 确保内容在导航栏下方 */
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* 添加媒体查询适配移动端 */
+@media (max-width: 768px) {
+    .navbar {
+        height: 50px;
+        padding: 8px 15px;
+    }
+    
+    .container {
+        margin-top: 70px;
+        padding: 20px;
+    }
+    
+    .logo {
+        font-size: 20px;
+    }
+    
+    .menu-button {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+/* 添加滚动时动态调整 */
+window.addEventListener('scroll', () => {
+    const navbar = document.querySelector('.navbar');
+    const container = document.querySelector('.container');
+    
+    if (window.scrollY > 50) {
+        navbar.style.height = '50px';
+        container.style.marginTop = '70px';
+    } else {
+        navbar.style.height = '60px';
+        container.style.marginTop = '80px';
+    }
+});
+       
+        
+    </style>
+</head>
+<body>
+<!-- 导航栏 -->
+<nav class="navbar">
+    <div class="logo">xiaoyumi</div>
+    <button class="menu-button" id="menuToggle">菜单</button>
+    <div class="nav-container" id="navContainer">
+        <ul class="nav-links">
+         <li><a href="https://xiaoyumi9243.github.io/buy.htm">购买</a></li>
+            <li><a href="https://xiaoyumi.com/buy/people">收购人群</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/games.htm">游戏</a></li>
+            <li><a href="https://xiaoyumi9243.github.io/login.htm" id="loginMenuItem">登录</a></li>
+           <li><a href="https://xiaoyumi9243.github.io/music.htm">音乐</a></li>
+           <li><a href="https://xiaoyumi9243.github.io/bbs.htm">论坛</a></li>
+           <li><a href="https://xiaoyumi9243.github.io/vido.htm">视频</a></li>
+           
+        </ul>
+    </div>
+</nav>
+    <div class="container">
+        <h1>视频选集</h1>
+        
+        <div class="video-player">
+            <iframe id="main-player" allowfullscreen></iframe>
+        </div>
+        
+        <div class="video-list" id="video-list">
+            <!-- 视频列表将通过JavaScript动态生成 -->
+        </div>
+        
+        <div class="controls">
+            <button id="prev-btn">上一个</button>
+            <button id="next-btn">下一个</button>
+            <button id="add-btn">添加视频</button>
+        </div>
+    </div>
+
+    <script>
+        // 视频数据 - 可以自定义修改或通过添加按钮增加
+        let videos = [
+            {
+                title: "B站视频示例1",
+                bvid: "BV1si5Rz7EWe",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/0a933ada83dbf9b6355929c6c8683650222bfadc.jpg@672w_378h_1c.webp",
+                duration: "5:30"
+            },
+            {
+                title: "B站视频示例2",
+                bvid: "BV12e5RzUEN8",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/d3cc8df823d0a86cdf5caa685afc4deb2b82ed99.jpg@672w_378h_1c.webp",
+                duration: "12:45"
+            },
+            {
+                title: "B站视频示例3",
+                bvid: "BV15PL3z5ERd",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/9e6fa0fafc4e07d73cc54ecc71cccd41d039061d.jpg@672w_378h_1c.webp",
+                duration: "8:20"
+            },
+            {
+                title: "B站视频示例4",
+                bvid: "BV1kUL9zVEPn",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/4214f3bbee221d748222b0dd10ba25661dc52eaf.jpg@672w_378h_1c.webp",
+                duration:"15:10"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1QzjFzCEWt",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/e982b2a97c378debd262aa42b5106547b4106af0.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1SyjFzgEjc",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/afbc0a8ad0ea0ac58651243982935eaadbf31b3f.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1SyjFzgE44",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/b3c83cd61106311c1452151cefdd3318bc81405d.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1t5G1z9EHC",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/d6d6e07e338bbd02a74bf413787487a9850c94d7.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1MVG1zsEBw",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/1bdb809f7c41c45c810fd97ef05b04289e8222bc.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1MVG1zsEqp",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/8b8f99f1eec01877a6ec6718ea6696ac9c1cddf5.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1ERGvz2Ed3",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/7feef3618a84a5e0e4e7b447be75b429b4a22ce8.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV14LV7zVEPg",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/b6dfa66e25ce8a97dd0d0b2ec42fa9d8cfc51c23.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV11rVrzkEcU",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/2908773914b1c2e189a7340c2e860d1ee66c8363.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1gh5Vz6EjZ",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/fb73edf092ed698f611d0912dab148e5a721ded1.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1Sh5VzzE2W",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/12c16a9b89c084c596a55c0d827f711c9c07c073.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1nmVDz8E88",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/896e651180b2429656cc449b2db0b06f0fd6488d.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            },
+            {
+                title: "B站视频示例5",
+                bvid: "BV1HmVDz8EjG",
+                thumbnail: "https://i1.hdslb.com/bfs/archive/4f14ec6f3c3b60409e716d8e475bdaeb95239f1c.jpg@672w_378h_1c.webp",
+                duration: "7:45"
+            }
+        ];
+
+        // 当前选中的视频索引
+        let currentVideoIndex = 0;
+        
+        // DOM元素
+        const videoListElement = document.getElementById('video-list');
+        const mainPlayerElement = document.getElementById('main-player');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const addBtn = document.getElementById('add-btn');
+        
+        // 初始化视频列表
+        function renderVideoList() {
+            videoListElement.innerHTML = '';
+            
+            videos.forEach((video, index) => {
+                const videoItem = document.createElement('div');
+                videoItem.className = `video-item ${index === currentVideoIndex ? 'active-video' : ''}`;
+                videoItem.innerHTML = `
+                    <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
+                    <div class="video-info">
+                        <div class="video-title">${video.title}</div>
+                        <div class="video-duration">${video.duration}</div>
+                    </div>
+                `;
+                
+                videoItem.addEventListener('click', () => {
+                    playVideo(index);
+                });
+                
+                videoListElement.appendChild(videoItem);
+            });
+            
+            // 滚动到当前选中的视频
+            const activeItem = videoListElement.children[currentVideoIndex];
+            if (activeItem) {
+                activeItem.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'center'
+                });
+            }
+        }
+        
+        // 播放指定索引的视频
+        function playVideo(index) {
+            if (index < 0 || index >= videos.length) return;
+            
+            currentVideoIndex = index;
+            const video = videos[index];
+            
+            // 更新主播放器
+            mainPlayerElement.src = `https://player.bilibili.com/player.html?bvid=${video.bvid}&autoplay=true&high_quality=1`;
+            
+            // 更新列表中的活动状态
+            renderVideoList();
+        }
+        
+        // 上一个视频
+        function prevVideo() {
+            const newIndex = (currentVideoIndex - 1 + videos.length) % videos.length;
+            playVideo(newIndex);
+        }
+        
+        // 下一个视频
+        function nextVideo() {
+            const newIndex = (currentVideoIndex + 1) % videos.length;
+            playVideo(newIndex);
+        }
+        
+        // 添加新视频
+        function addVideo() {
+            const title = prompt("请输入视频标题:");
+            if (!title) return;
+            
+            const bvid = prompt("请输入B站视频BV号(例如 BV1FZ4y1k7fa):");
+            if (!bvid) return;
+            
+            const thumbnail = prompt("请输入缩略图URL(可选):") || "https://via.placeholder.com/250x140";
+            const duration = prompt("请输入视频时长(例如 5:30):") || "0:00";
+            
+            videos.push({
+                title,
+                bvid,
+                thumbnail,
+                duration
+            });
+            
+            renderVideoList();
+        }
+        
+        // 初始化
+        function init() {
+            renderVideoList();
+            playVideo(0);
+            
+            // 事件监听
+            prevBtn.addEventListener('click', prevVideo);
+            nextBtn.addEventListener('click', nextVideo);
+            addBtn.addEventListener('click', addVideo);
+            
+            // 键盘左右键控制
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    prevVideo();
+                } else if (e.key === 'ArrowRight') {
+                    nextVideo();
+                }
+            });
+        }
+        
+        // 启动应用
+        init();
+    </script>
+    <script>
+// 获取Cookie值的辅助函数
+function getCookie(name) {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [cookieName, cookieValue] = cookie.trim().split('=');
+        if (cookieName === name) {
+            return decodeURIComponent(cookieValue);
+        }
+    }
+    return null;
+}
+
+// 检查登录状态并更新UI
+function checkLoginStatus() {
+    const username = getCookie('username');
+    const isLoggedIn = getCookie('isLoggedIn') === 'true';
+    const loginMenuItem = document.getElementById('loginMenuItem');
+    
+    // 确保找到了登录菜单项
+    if (!loginMenuItem) {
+        console.error('未找到登录菜单项');
+        return;
+    }
+    
+    // 检查是否已登录
+    if (isLoggedIn && username) {
+        console.log('用户已登录:', username);
+        
+        // 更改"登录"为用户名
+        loginMenuItem.textContent = username;
+        loginMenuItem.href = 'https://xiaoyumi9243.github.io/profile.htm';
+        
+        // 检查是否已存在退出按钮，避免重复添加
+        if (!document.getElementById('logoutLink')) {
+            // 添加退出选项
+            const logoutItem = document.createElement('li');
+            logoutItem.innerHTML = '<a href="#" id="logoutLink" style="color: #ff6b6b !important;">退出</a>';
+            loginMenuItem.parentNode.appendChild(logoutItem);
+            
+            // 添加退出功能
+            document.getElementById('logoutLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                // 清除Cookie
+                document.cookie = 'username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                document.cookie = 'isLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                // 重定向到首页
+                window.location.href = 'https://xiaoyumi9243.github.io/';
+            });
+        }
+    } else {
+        console.log('用户未登录或Cookie无效');
+        // 确保登录菜单项是默认状态
+        loginMenuItem.textContent = '登录';
+        loginMenuItem.href = 'https://xiaoyumi9243.github.io/login.htm';
+        
+        // 移除退出按钮如果存在
+        const logoutLink = document.getElementById('logoutLink');
+        if (logoutLink) {
+            logoutLink.parentNode.remove();
+        }
+    }
+}
+
+// 页面加载时检查登录状态
+window.addEventListener('DOMContentLoaded', checkLoginStatus);
+
+// 添加一个定时检查，确保状态更新
+setInterval(checkLoginStatus, 1000);
+</script>
+<script>
+        // 菜单切换功能
+        const menuToggle = document.getElementById('menuToggle');
+        const navContainer = document.getElementById('navContainer');
+        
+        menuToggle.addEventListener('click', function() {
+            navContainer.classList.toggle('show');
+            
+            // 更改按钮文本
+            if (navContainer.classList.contains('show')) {
+                menuToggle.textContent = '关闭';
+            } else {
+                menuToggle.textContent = '菜单';
+            }
+        });
+        
+        // 点击页面其他区域关闭菜单
+        document.addEventListener('click', function(event) {
+            if (!navContainer.contains(event.target) && event.target !== menuToggle) {
+                navContainer.classList.remove('show');
+                menuToggle.textContent = '菜单';
+            }
+        });
+        
+        // 弹窗控制代码
+        const showModalBtn = document.getElementById('showModalBtn');
+        const announcementModal = document.getElementById('announcementModal');
+        const closeAnnouncement = document.getElementById('closeAnnouncement');
+        
+        showModalBtn.addEventListener('click', function() {
+            announcementModal.style.display = 'flex';
+        });
+        
+        closeAnnouncement.addEventListener('click', function() {
+            announcementModal.style.display = 'none';
+        });
+        
+        announcementModal.addEventListener('click', function(e) {
+            if (e.target === announcementModal) {
+                announcementModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

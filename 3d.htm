@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D性能测试器（完整版）</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            touch-action: none;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 100;
+            max-width: 380px;
+            font-size: 14px;
+            line-height: 1.5;
+            backdrop-filter: blur(5px);
+            /* 在原样式基础上添加 */
+            transition: all 0.3s ease;
+            overflow: hidden;
+            max-height: 500px; /* 展开时的高度 */
+        }
+        .input-group {
+            margin: 12px 0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        input[type="number"] {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #333;
+            color: white;
+            font-size: 14px;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 4px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        button:hover:not(:disabled) {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        #color-picker {
+            width: 100%;
+            height: 40px;
+            margin: 12px 0;
+        }
+        .performance-metrics {
+            margin-top: 15px;
+            border-top: 1px solid #444;
+            padding-top: 15px;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+        .metric-name {
+            color: #aaa;
+            font-size: 13px;
+        }
+        .metric-value {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        @media (max-width: 600px) {
+            #ui {
+                width: 90%;
+                padding: 12px;
+                font-size: 13px;
+            }
+            button {
+                padding: 6px 12px;
+            }
+            #ui.collapsed {
+            max-height: 40px; /* 只显示标题栏的高度 */
+            overflow: hidden;
+        }
+        #toggle-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 101;
+        }
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="ui">
+    <button id="toggle-btn">≡</button>
+        <h2 style="margin:0 0 15px 0; color: #4CAF50;">3D性能测试器</h2>
+        
+        <div class="input-group">
+            <input type="number" id="batch-count" value="100" min="1" max="5000" step="10">
+            <button id="batch-add">批量生成</button>
+        </div>
+
+        <div class="input-group">
+            <button id="add-cube" class="shape-btn">■ 立方体</button>
+            <button id="add-sphere" class="shape-btn">● 球体</button>
+            <button id="add-cylinder" class="shape-btn">▲ 圆柱</button>
+        </div>
+
+        <div class="input-group">
+            <button id="remove">🗑️ 删除选中</button>
+            <button id="clear">💥 清空场景</button>
+        </div>
+
+        <div>
+            <label for="color-picker">🎨 物体颜色:</label>
+            <input type="color" id="color-picker" value="#00ff00">
+        </div>
+
+        <div class="performance-metrics">
+            <div class="metric">
+                <span class="metric-name">实时帧率 (FPS):</span>
+                <span class="metric-value" id="fps">-</span>
+            </div>
+            <div class="metric">
+                <span class="metric-name">场景对象:</span>
+                <span class="metric-value" id="obj-count">0</span>
+            </div>
+            <div class="metric">
+                <span class="metric-name">显存占用:</span>
+                <span class="metric-value" id="memory">-</span>
+            </div>
+            <div class="metric">
+                <span class="metric-name">绘制调用:</span>
+                <span class="metric-value" id="draw-calls">-</span>
+            </div>
+            <div class="metric">
+                <span class="metric-name">顶点总数:</span>
+                <span class="metric-value" id="vertices">-</span>
+            </div>
+            <div class="metric">
+                <span class="metric-name">三角面数:</span>
+                <span class="metric-value" id="triangles">-</span>
+            </div>
+        </div>
+    </div>
+  <!-- 正确加载顺序：先Three.js后控制器 -->
+<script src="https://xiaoyumi9243-github-io.pages.dev/three.min.js"></script>
+<script src="https://xiaoyumi9243-github-io.pages.dev/OrbitControls.js"></script>
+<script>
+    // 初始化核心组件
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a1a);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 5, 20);
+    
+    const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        powerPreference: "high-performance"
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.getElementById('container').appendChild(renderer.domElement);
+
+    // 光照系统
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(5, 5, 5);
+    scene.add(directionalLight);
+    scene.add(new THREE.DirectionalLightHelper(directionalLight, 2));
+
+    // 坐标系辅助
+    scene.add(new THREE.AxesHelper(10));
+
+    // 对象管理系统
+    const objects = [];
+    let selectedObject = null;
+    const materialCache = new Map();
+    let currentGeometryType = 'cube';
+
+    // 性能监控系统
+    let frameTimes = [];
+    let lastFpsUpdate = performance.now();
+    let lastFrameTime = performance.now();
+    let fps = 0;
+
+    // 控制器系统
+    let controls;
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = true;
+
+    // 材质管理系统
+    function createMaterial(color) {
+        const hex = new THREE.Color(color).getHex();
+        if (materialCache.has(hex)) return materialCache.get(hex);
+        
+        const material = new THREE.MeshPhongMaterial({
+            color: color,
+            specular: 0x111111,
+            shininess: 30,
+            side: THREE.DoubleSide
+        });
+        
+        materialCache.set(hex, material);
+        return material;
+    }
+
+    // 几何体工厂
+    function createGeometry(type = currentGeometryType) {
+        const size = 1;
+        switch(type) {
+            case 'sphere': 
+                return new THREE.SphereGeometry(size/2, 32, 32);
+            case 'cylinder':
+                return new THREE.CylinderGeometry(size/2, size/2, size, 32);
+            default: // cube
+                return new THREE.BoxGeometry(size, size, size);
+        }
+    }
+
+    // 对象操作
+    function addObject() {
+        const geometry = createGeometry();
+        const material = createMaterial(document.getElementById('color-picker').value);
+        
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(
+            (Math.random() - 0.5) * 20,
+            (Math.random() - 0.5) * 20,
+            (Math.random() - 0.5) * 20
+        );
+        mesh.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+        );
+        
+        scene.add(mesh);
+        objects.push(mesh);
+        selectedObject = mesh;
+        updateMetrics();
+    }
+
+    // 批量生成系统
+    async function batchAddObjects(count) {
+        const batchSize = 100;
+        const totalBatches = Math.ceil(count / batchSize);
+        
+        document.getElementById('batch-add').disabled = true;
+        
+        for (let i = 0; i < totalBatches; i++) {
+            const currentCount = Math.min(batchSize, count - i * batchSize);
+            await new Promise(resolve => {
+                setTimeout(() => {
+                    for (let j = 0; j < currentCount; j++) addObject();
+                    resolve();
+                }, 0);
+            });
+        }
+        
+        document.getElementById('batch-add').disabled = false;
+        updateMetrics();
+    }
+
+    // 性能指标计算
+    function updateMetrics() {
+        document.getElementById('obj-count').textContent = objects.length;
+        
+        let vertices = 0, triangles = 0;
+        objects.forEach(obj => {
+            const geom = obj.geometry;
+            if (geom.index) {
+                triangles += geom.index.count / 3;
+                vertices += geom.attributes.position.count;
+            } else {
+                triangles += geom.attributes.position.count / 3;
+                vertices += geom.attributes.position.count;
+            }
+        });
+        
+        let vram = 0;
+        objects.forEach(obj => {
+            const geom = obj.geometry;
+            vram += geom.attributes.position.array.length * 4;
+            if (geom.index) vram += geom.index.array.length * 2;
+        });
+        vram += materialCache.size * 5120;
+        document.getElementById('memory').textContent = `${(vram / 1048576).toFixed(1)} MB`;
+        
+        document.getElementById('vertices').textContent = vertices.toLocaleString();
+        document.getElementById('triangles').textContent = triangles.toLocaleString();
+        document.getElementById('draw-calls').textContent = renderer.info.render.calls;
+        renderer.info.reset();
+    }
+
+    // 事件监听
+    document.querySelectorAll('.shape-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentGeometryType = this.id.replace('add-', '');
+            document.querySelectorAll('.shape-btn').forEach(b => 
+                b.style.backgroundColor = '');
+            this.style.backgroundColor = '#45a049';
+        });
+    });
+
+    document.getElementById('batch-add').addEventListener('click', () => {
+        const input = document.getElementById('batch-count');
+        let count = Math.min(5000, Math.max(1, parseInt(input.value) || 100));
+        input.value = count;
+        batchAddObjects(count);
+    });
+
+    document.getElementById('color-picker').addEventListener('input', e => {
+        if (selectedObject) {
+            const oldMat = selectedObject.material;
+            selectedObject.material = createMaterial(e.target.value);
+            oldMat.dispose();
+        }
+    });
+
+    document.getElementById('remove').addEventListener('click', () => {
+        if (selectedObject) {
+            const index = objects.indexOf(selectedObject);
+            scene.remove(selectedObject);
+            selectedObject.geometry.dispose();
+            selectedObject.material.dispose();
+            objects.splice(index, 1);
+            selectedObject = null;
+            updateMetrics();
+        }
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+        objects.forEach(obj => {
+            scene.remove(obj);
+            obj.geometry.dispose();
+            obj.material.dispose();
+        });
+        objects.length = 0;
+        materialCache.clear();
+        updateMetrics();
+    });
+
+    // 动画循环
+    function animate() {
+        const now = performance.now();
+        const deltaTime = now - lastFrameTime;
+        lastFrameTime = now;
+        frameTimes.push(deltaTime);
+        
+        if (frameTimes.length > 60) frameTimes.shift();
+        
+        if (now - lastFpsUpdate > 1000) {
+            fps = Math.round(1000 / (frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length));
+            document.getElementById('fps').textContent = fps;
+            lastFpsUpdate = now;
+            frameTimes = [];
+        }
+        
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+
+    // 启动系统
+    animate();
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+<script>
+        // 折叠/展开功能
+        const toggleBtn = document.getElementById('toggle-btn');
+        const uiPanel = document.getElementById('ui');
+        
+        toggleBtn.addEventListener('click', () => {
+            uiPanel.classList.toggle('collapsed');
+            toggleBtn.textContent = uiPanel.classList.contains('collapsed') ? '≡' : '×';
+        });
+        </script>
+</body>
+</html>

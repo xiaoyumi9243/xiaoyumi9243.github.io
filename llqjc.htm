@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浏览器检测工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .browser-info {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .info-item {
+            margin: 10px 0;
+            display: flex;
+        }
+        .info-label {
+            font-weight: bold;
+            min-width: 150px;
+        }
+        .info-value {
+            color: #3498db;
+        }
+        .ua-display {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 3px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 浏览器内核及版本检测工具</h1>
+    <div class="browser-info">
+        <div class="info-item">
+            <span class="info-label">浏览器名称：</span>
+            <span class="info-value" id="browser-name">检测中...</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">浏览器版本：</span>
+            <span class="info-value" id="browser-version">检测中...</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">渲染引擎：</span>
+            <span class="info-value" id="rendering-engine">检测中...</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">操作系统：</span>
+            <span class="info-value" id="operating-system">检测中...</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">用户代理（UA）：</span>
+            <div class="ua-display" id="user-agent"></div>
+        </div>
+    </div>
+
+    <script>
+        // 检测浏览器信息
+        function detectBrowser() {
+            const userAgent = navigator.userAgent;
+            document.getElementById("user-agent").textContent = userAgent;
+
+            // 检测浏览器名称和版本
+            let browserName, browserVersion;
+            if (userAgent.includes("Firefox")) {
+                browserName = "Firefox";
+                browserVersion = userAgent.match(/Firefox\/(\d+\.\d+)/)[1];
+            } else if (userAgent.includes("Edg")) {
+                browserName = "Microsoft Edge";
+                browserVersion = userAgent.match(/Edg\/(\d+\.\d+)/)[1];
+            } else if (userAgent.includes("Chrome")) {
+                browserName = "Google Chrome";
+                browserVersion = userAgent.match(/Chrome\/(\d+\.\d+)/)[1];
+            } else if (userAgent.includes("Safari")) {
+                browserName = "Safari";
+                browserVersion = userAgent.match(/Version\/(\d+\.\d+)/)[1];
+            } else if (userAgent.includes("Opera") || userAgent.includes("OPR")) {
+                browserName = "Opera";
+                browserVersion = userAgent.match(/(?:Opera|OPR)\/(\d+\.\d+)/)[1];
+            } else {
+                browserName = "未知浏览器";
+                browserVersion = "未知版本";
+            }
+
+            // 检测渲染引擎
+            let renderingEngine = "未知";
+            if (userAgent.includes("Gecko")) {
+                renderingEngine = "Gecko (Firefox)";
+            } else if (userAgent.includes("AppleWebKit")) {
+                renderingEngine = "WebKit (Chrome/Safari/Edge)";
+            } else if (userAgent.includes("Trident") || userAgent.includes("MSIE")) {
+                renderingEngine = "Trident (旧版 IE)";
+            } else if (userAgent.includes("Blink")) {
+                renderingEngine = "Blink (Chrome/Edge/Opera)";
+            }
+
+            // 检测操作系统
+            let operatingSystem = "未知";
+            if (userAgent.includes("Windows")) {
+                operatingSystem = "Windows";
+            } else if (userAgent.includes("Mac OS")) {
+                operatingSystem = "macOS";
+            } else if (userAgent.includes("Linux")) {
+                operatingSystem = "Linux";
+            } else if (userAgent.includes("Android")) {
+                operatingSystem = "Android";
+            } else if (userAgent.includes("iOS")) {
+                operatingSystem = "iOS";
+            }
+
+            // 更新页面显示
+            document.getElementById("browser-name").textContent = browserName;
+            document.getElementById("browser-version").textContent = browserVersion;
+            document.getElementById("rendering-engine").textContent = renderingEngine;
+            document.getElementById("operating-system").textContent = operatingSystem;
+        }
+
+        // 页面加载后自动检测
+        window.onload = detectBrowser;
+    </script>
+</body>
+</html>
