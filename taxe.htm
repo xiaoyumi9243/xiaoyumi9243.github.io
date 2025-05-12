@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>极验验证测试</title>
+  <!-- 引入极验JS -->
+  <script src="https://static.geetest.com/gt.js"></script>
+</head>
+<body>
+  <!-- 验证容器 -->
+  <div id="gt-captcha" style="width: 300px; margin: 50px auto;"></div>
+
+  <script>
+    // 初始化极验
+    var captcha = new Geetest({
+      gt: "46695a40bef741c7296e01587db71ab8", // 替换为你的captcha_id
+      product: "float",
+      offline: false
+    });
+
+    // 绑定到容器
+    captcha.appendTo("#gt-captcha");
+
+    // 验证成功回调
+    captcha.onSuccess(function() {
+      alert("验证通过！");
+    });
+
+    // 调试：强制显示验证框（可选）
+    setTimeout(() => {
+      captcha.showCaptcha();
+    }, 1000);
+  </script>
+</body>
+</html>
