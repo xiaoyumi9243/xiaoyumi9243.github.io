@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xiaoyumi论坛</title>
     <style>
+    /* 帖子附件样式 */
+.post-file {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(114, 203, 59, 0.1);
+    border-radius: 8px;
+}
+
+.post-file a {
+    color: #72cb3b;
+    text-decoration: none;
+}
+
+.post-file a:hover {
+    text-decoration: underline;
+}
+
+.post-video-container {
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.post-video {
+    width: 100%;
+    max-height: 400px;
+    background: #000;
+}
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -436,6 +464,8 @@ window.addEventListener('scroll', () => {
     <!-- 导航栏 -->
 <nav class="navbar">
     <div class="logo">xiaoyumi</div>
+    <div>
+        <button class="menu-button" id="newPostBtn">✏️ 写帖子</button>
     <button class="menu-button" id="menuToggle">菜单</button>
     <div class="nav-container" id="navContainer">
         <ul class="nav-links">
@@ -476,112 +506,235 @@ window.addEventListener('scroll', () => {
 </footer>
 
     <script>
-        // 配置信息（修改为您的GitHub信息）
-        const CONFIG = {
-            repoUrl: 'https://xiaoyumi9243.github.io/bbs.txt',
-            cacheBust: true
-        };
+        // ========== 全局配置 ==========
+const CONFIG = {
+    apiBase: 'https://xiaoyumi9243.fwh.is/api', // InfinityFree API地址
+    uploadMaxSize: 10 * 1024 * 1024 // 10MB
+};
 
-        // 增强版数据解析
-        function parseBBSData(text) {
-            return text.split(/(?=\n?{)/g) // 更准确的分割正则
-                .filter(block => block.trim())
-                .map(block => {
-                    try {
-                        const post = {};
-                        block.replace(/^{|}$/g, '')
-                            .split('\n')
-                            .filter(line => line.trim())
-                            .forEach(line => {
-                                const [key, ...valueParts] = line.split(':[');
-                                const value = valueParts.join(':[').replace(/\]$/, '').trim();
-                                if (key && value) post[key.trim()] = value;
-                            });
-                        
-                        // 数据验证和格式化
-                        return {
-               author: post.name || '匿名用户',
-                            title: post.little || '无标题',
-                            content: post.text || '无内容',
-                            photo: post.photo === 'Done' ? null : post.photo,
-                            date: new Date().toLocaleString('zh-CN', { 
-                                year: 'numeric', 
-                                month: '2-digit', 
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })
-                        };
-                    } catch (e) {
-                        console.warn('解析失败:', e);
-                        return null;
-                    }
-                })
-                .filter(Boolean);
-        }
+// ========== DOM加载完成后执行 ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化功能
+    initMenuToggle();
+    checkLoginStatus();
+    loadPosts();
+    
+    // 发帖按钮事件
+    document.getElementById('newPostBtn').addEventListener('click', handleNewPostClick);
+    
+    // 刷新按钮事件
+    document.querySelector('.refresh-btn').addEventListener('click', loadPosts);
+});
 
-        // 渲染帖子内容
-        function renderPosts(posts) {
-            const container = document.getElementById('posts-container');
-            
-            if (!posts.length) {
-                container.innerHTML = `<div class="no-image">📭 暂时没有帖子</div>`;
-                return;
-            }
+// ========== 核心功能函数 ==========
 
-            container.innerHTML = posts.map(post => `
-                <div class="post">
-                    <div class="post-header">
-                        <div class="user-icon">${post.author[0]}</div>
-                        <div class="post-meta">
-                            <div class="post-author">${post.author}</div>
-                            <div class="post-date">📅 ${post.date}</div>
-                        </div>
-                    </div>
-                    <h3 class="post-title">${post.title}</h3>
-                    <div class="post-content">${post.content}</div>
-                    ${post.photo ? `
-                    <div class="post-image-container">
-                        <img src="${post.photo}" 
-                             class="post-image" 
-                             alt="帖子配图"
-                             loading="lazy"
-                             onerror="this.style.display='none'">
-                    </div>` : 
-                    `<div class="no-image">📷 无图片附件</div>`}
+/**
+ * 加载帖子列表
+ */
+async function loadPosts() {
+    try {
+        showLoading(true, '正在加载帖子...');
+        
+        const response = await fetch(`${CONFIG.apiBase}/get_posts.php`);
+        if (!response.ok) throw new Error('加载失败');
+        
+        const posts = await response.json();
+        renderPosts(posts || []);
+    } catch (error) {
+        showError(`加载失败: ${error.message}`);
+    } finally {
+        showLoading(false);
+    }
+}
+
+/**
+ * 渲染帖子列表
+ */
+function renderPosts(posts) {
+    const container = document.getElementById('posts-container');
+    
+    if (!posts.length) {
+        container.innerHTML = `<div class="no-image">📭 暂时没有帖子</div>`;
+        return;
+    }
+
+    container.innerHTML = posts.map(post => `
+        <div class="post" data-id="${post.id}">
+            <div class="post-header">
+                <div class="user-icon">${post.author?.[0] || '?'}</div>
+                <div class="post-meta">
+                    <div class="post-author">${post.author || '匿名用户'}</div>
+                    <div class="post-date">📅 ${post.date || '未知时间'}</div>
                 </div>
-            `).join('');
+            </div>
+            <h3 class="post-title">${escapeHtml(post.title || '无标题')}</h3>
+            <div class="post-content">${formatContent(post.content)}</div>
+            ${renderAttachment(post)}
+        </div>
+    `).join('');
+}
+
+/**
+ * 渲染附件内容
+ */
+function renderAttachment(post) {
+    if (!post.file) return `<div class="no-image">📷 无附件</div>`;
+    
+    const ext = post.file.split('.').pop().toLowerCase();
+    const imageTypes = ['jpg', 'jpeg', 'png', 'gif'];
+    const videoTypes = ['mp4', 'webm'];
+    
+    if (imageTypes.includes(ext)) {
+        return `
+        <div class="post-image-container">
+            <img src="${CONFIG.apiBase}/uploads/${post.file}" 
+                 class="post-image" 
+                 alt="帖子图片"
+                 loading="lazy"
+                 onerror="this.style.display='none'">
+        </div>`;
+    } else if (videoTypes.includes(ext)) {
+        return `
+        <div class="post-video-container">
+            <video controls class="post-video">
+                <source src="${CONFIG.apiBase}/uploads/${post.file}" type="video/${ext}">
+                您的浏览器不支持视频播放
+            </video>
+        </div>`;
+    } else {
+        return `
+        <div class="post-file">
+            <a href="${CONFIG.apiBase}/uploads/${post.file}" download>
+                📎 下载附件 (${ext.toUpperCase()})
+            </a>
+        </div>`;
+    }
+}
+
+// ========== 发帖功能 ==========
+
+/**
+ * 处理发帖按钮点击
+ */
+function handleNewPostClick() {
+    if (!checkLogin()) {
+        showError('请先登录！');
+        setTimeout(() => window.location.href = 'login.htm', 1500);
+        return;
+    }
+    window.location.href = 'bbs.php'; // 跳转到发帖页面
+}
+
+// ========== 辅助函数 ==========
+
+/**
+ * 检查登录状态
+ */
+function checkLogin() {
+    const cookies = document.cookie.split(';').reduce((cookies, cookie) => {
+        const [name, value] = cookie.trim().split('=');
+        cookies[name] = decodeURIComponent(value);
+        return cookies;
+    }, {});
+    return cookies['username'] && cookies['isLoggedIn'] === 'true';
+}
+
+/**
+ * 更新登录状态UI
+ */
+function checkLoginStatus() {
+    const username = getCookie('username');
+    const loginMenuItem = document.getElementById('loginMenuItem');
+    
+    if (username && getCookie('isLoggedIn') === 'true') {
+        loginMenuItem.textContent = username;
+        loginMenuItem.href = 'profile.htm';
+        
+        if (!document.getElementById('logoutLink')) {
+            const logoutItem = document.createElement('li');
+            logoutItem.innerHTML = '<a href="#" id="logoutLink" style="color: #ff6b6b !important;">退出</a>';
+            loginMenuItem.parentNode.appendChild(logoutItem);
+            
+            document.getElementById('logoutLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.cookie = 'username=; path=/; max-age=0';
+                document.cookie = 'isLoggedIn=; path=/; max-age=0';
+                window.location.reload();
+            });
         }
+    }
+}
 
-        // 数据加载逻辑
-        async function loadData() {
-            const loading = document.getElementById('loading');
-            const error = document.getElementById('error');
-            const url = CONFIG.cacheBust ? 
-                `${CONFIG.repoUrl}?t=${Date.now()}` : 
-                CONFIG.repoUrl;
+/**
+ * 获取Cookie
+ */
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
 
-            try {
-                loading.style.display = 'block';
-                error.textContent = '';
-                
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
-                
-                const data = await response.text();
-                const posts = parseBBSData(data);
-                renderPosts(posts);
-                
-            } catch (err) {
-                error.textContent = `❌ 加载失败: ${err.message}`;
-                console.error('Error:', err);
-            } finally {
-                loading.style.display = 'none';
-            }
+/**
+ * HTML转义
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * 格式化内容（换行处理）
+ */
+function formatContent(text) {
+    return (text || '')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>');
+}
+
+/**
+ * 显示加载状态
+ */
+function showLoading(show, message = '加载中...') {
+    const loader = document.getElementById('loading');
+    if (show) {
+        loader.innerHTML = `<p>⏳ ${message}</p>`;
+        loader.style.display = 'block';
+    } else {
+        loader.style.display = 'none';
+    }
+}
+
+/**
+ * 显示错误信息
+ */
+function showError(message) {
+    const errorEl = document.getElementById('error');
+    errorEl.textContent = `❌ ${message}`;
+    errorEl.style.display = 'block';
+    setTimeout(() => errorEl.style.display = 'none', 5000);
+}
+
+/**
+ * 菜单切换功能
+ */
+function initMenuToggle() {
+    const menuToggle = document.getElementById('menuToggle');
+    const navContainer = document.getElementById('navContainer');
+    
+    menuToggle.addEventListener('click', () => {
+        navContainer.classList.toggle('show');
+        menuToggle.textContent = navContainer.classList.contains('show') ? '关闭' : '菜单';
+    });
+    
+    document.addEventListener('click', (event) => {
+        if (!navContainer.contains(event.target) && event.target !== menuToggle) {
+            navContainer.classList.remove('show');
+            menuToggle.textContent = '菜单';
         }
-
-        // 初始加载
-        window.addEventListener('DOMContentLoaded', loadData);
+    });
+}
     </script>
     <script>
         // 菜单切换功能
@@ -695,6 +848,25 @@ window.addEventListener('DOMContentLoaded', checkLoginStatus);
 
 // 添加一个定时检查，确保状态更新
 setInterval(checkLoginStatus, 1000);
+// 检查登录状态的函数
+function checkLogin() {
+    const cookies = document.cookie.split(';').reduce((cookies, cookie) => {
+        const [name, value] = cookie.trim().split('=');
+        cookies[name] = decodeURIComponent(value);
+        return cookies;
+    }, {});
+    return cookies['username'] && cookies['isLoggedIn'] === 'true';
+}
+
+// 发帖按钮点击事件
+document.getElementById('newPostBtn').addEventListener('click', () => {
+    if (!checkLogin()) {
+        alert('请先登录！');
+        window.location.href = 'https://xiaoyumi9243.github.io/login.htm';
+        return;
+    }
+    window.location.href = 'https://xiaoyumi9243.fwh.is/bbs.php';
+});
 </script>
 </body>
 </html>
