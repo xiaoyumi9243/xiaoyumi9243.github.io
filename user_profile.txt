@@ -1,6 +1,0 @@
-user{
-username:admin
-buy:暂无订单
-aq:辅助手机号13387739883
-辅助邮箱yuminghao3314673771@outlook.com
-}
