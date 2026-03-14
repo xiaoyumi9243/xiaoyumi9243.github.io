@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>嵌入窗口 - 加载中...</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #f5f5f7;
+        }
+        
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        iframe.loaded {
+            opacity: 1;
+        }
+        
+        .loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #666;
+            font-family: system-ui, -apple-system, sans-serif;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 12px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #007aff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loader.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <div>加载中...</div>
+        </div>
+        <iframe 
+            id="embedFrame" 
+            src="about:blank" 
+            allow="cookies; clipboard-write; clipboard-read;"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-storage-access-by-user-activation"
+            referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+    </div>
+
+    <script>
+        // 你要嵌入的网页地址 - 修改这里
+        const embedUrl = 'https://xiaoyumi9243.wuaze.com';  // 百度实际需要cookie
+        
+        // ========== 关键：正确设置cookie，让iframe页面能识别 ==========
+        (function enableCookiesForIframe() {
+            // 设置多个cookie属性组合，确保各种浏览器都认
+            const cookies = [
+                'cookie_consent=true',
+                'cookies_enabled=1',
+                'session_active=yes'
+            ];
+            
+            // 获取当前协议
+            const isSecure = location.protocol === 'https:';
+            
+            cookies.forEach(nameValue => {
+                // 基础cookie
+                let cookieStr = nameValue + '; path=/; max-age=86400';
+                
+                // 关键：SameSite=None + Secure 才能跨域传递
+                if (isSecure) {
+                    cookieStr += '; SameSite=None; Secure';
+                } else {
+                    // 如果是http环境，只能用Lax
+                    cookieStr += '; SameSite=Lax';
+                }
+                
+                document.cookie = cookieStr;
+                
+                // 再设置一个不带SameSite的旧式cookie做后备
+                document.cookie = nameValue + '; path=/; max-age=86400';
+            });
+            
+            // 额外：设置一个检测cookie，很多网站会检查这个
+            document.cookie = 'testcookie=1; path=/; max-age=86400' + (isSecure ? '; SameSite=None; Secure' : '');
+        })();
+        
+        // ========== iframe处理 ==========
+        const iframe = document.getElementById('embedFrame');
+        const loader = document.getElementById('loader');
+        
+        // 重要：先设置sandbox属性允许cookie，再设置src
+        iframe.src = embedUrl;
+        
+        // 监听加载完成
+        iframe.onload = function() {
+            // 隐藏加载图标
+            loader.classList.add('hidden');
+            iframe.classList.add('loaded');
+            
+            // 尝试获取iframe内的标题
+            try {
+                const iframeTitle = iframe.contentDocument.title;
+                if (iframeTitle) {
+                    document.title = iframeTitle;
+                }
+            } catch (e) {
+                // 跨域时无法读取，显示默认标题
+                document.title = '嵌入页面';
+            }
+            
+            // 可选：尝试在iframe内也设置cookie（如果是同域才有用）
+            try {
+                if (iframe.contentDocument) {
+                    iframe.contentDocument.cookie = 'iframe_cookie=1; path=/; max-age=86400';
+                }
+            } catch (e) {
+                // 跨域会失败，忽略
+            }
+        };
+        
+        // 超时保护
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            iframe.classList.add('loaded');
+        }, 5000);
+    </script>
+</body>
+</html>
