@@ -37,7 +37,10 @@ See https://github.com/adobe-type-tools/cmap-resources
 <script src="../build/pdf.mjs" type="module"></script>
 
     <link rel="stylesheet" href="viewer.css" />
-
+<script>
+PDFViewerApplicationOptions.set('disableRange', true);
+  PDFViewerApplicationOptions.set('disableStream', true);
+</script>
   <script src="viewer.mjs" type="module"></script>
   </head>
 
